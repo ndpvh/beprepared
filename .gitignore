@@ -1,6 +1,7 @@
 figures/
 results/
-test*
 *.out
 */*/__pycache__/
 .DS_Store
+test.gif
+test.Rds
