@@ -21,10 +21,14 @@ function. Should in the least contain the agent characteristics under
 \item{time_step}{Numeric denoting the time between each iteration. Defaults 
 to \code{0.5} (the same as in \code{\link[predped]{simulate,predped-method}}).}
 
-\item{surface_exposure_ratio}{}
+\item{average_emission}{Numeric denoting the average emission of a virus 
+through exposure (air and droplet). Defaults to \code{10^6}.}
+
+\item{surface_exposure_ratio}{Numeric denoting a person's exposure to surfaces
+per time unit. Defaults to \code{0.01}.}
 
 \item{fx}{Function that will translate contamination exposure to risk. 
-By default uses the \code{\link[predped]{hill_function}}.}
+By default uses the \code{\link[beprepared]{hill_function}}.}
 
 \item{...}{Additional arguments passed on to \code{fx}.}
 }

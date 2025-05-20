@@ -18,7 +18,9 @@ Imports:
     ggplot2,
     data.table,
     ggpubr,
-    matrixStats
+    matrixStats,
+    gifski,
+    scales
 RoxygenNote: 7.3.2
 Collate:
     'imports.R'

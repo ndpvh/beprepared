@@ -199,15 +199,15 @@ simulate <- function(filename,
     #---------------------------------------------------------------------------
 
     # Define the predped model to use for the simulation
-    model <- predped::predped(
+    model <- predped(
         setting = environment, 
         archetypes = archetypes, 
         weights = weights
     )
 
     # Actually do the simulation and transform the data to a time-series format.
-    trace <- predped::simulate(model, time_step = time_step, ...)
-    data <- predped::time_series(trace)
+    trace <- simulate(model, time_step = time_step, ...)
+    data <- time_series(trace)
 
     # Add an indicator that says whether the agent has performed their goal or 
     # not. Used in the translation functions
@@ -225,16 +225,16 @@ simulate <- function(filename,
 
     # Get all surfaces out of the objects list
     idx <- sapply(
-        predped::objects(environment), 
-        function(x) grepl("surface", predped::id(x), fixed = TRUE)
+        objects(environment), 
+        function(x) grepl("surface", id(x), fixed = TRUE)
     )
 
     # Get the value to use as the value for `min_x` in `discretize`. This value 
     # corresponds to the minimal value of `x` and `y` extracted from the shape
     # of the environment.
     origin <- environment %>% 
-        predped::shape() %>% 
-        predped::points() %>% 
+        shape() %>% 
+        points() %>% 
         matrixStats::colMins()
 
     # Discretize the relevant positions in the data, them being the positions of 
@@ -268,7 +268,7 @@ simulate <- function(filename,
     # translate them to Walls and Barriers using the Python-defined translate 
     # function, as expected by the QVEmod functions.
     shape_segments <- environment %>% 
-        predped::shape() %>% 
+        shape() %>% 
         segmentize(
             discretize = TRUE,
             origin = origin,
@@ -276,7 +276,7 @@ simulate <- function(filename,
         ) 
 
     object_segments <- lapply(
-        predped::objects(environment)[!idx],
+        objects(environment)[!idx],
         \(x) segmentize(
             x, 
             discretize = TRUE,
@@ -289,8 +289,8 @@ simulate <- function(filename,
     # We also need to impose Voids in the environment. Importantly, these are 
     # defined on the air-cell level, not on the general space level.
     env_size <- environment %>% 
-        predped::shape() %>% 
-        predped::size()
+        shape() %>% 
+        size()
 
     air_dx <- (env_config$AirCellSize / env_config$MobilityCellSize) * dx
     x <- seq(air_dx/2, env_size[1] - air_dx/2, by = air_dx)
@@ -301,8 +301,8 @@ simulate <- function(filename,
     )
     within <- rowSums(
         sapply(
-            predped::objects(environment)[!idx],
-            \(x) predped::in_object(x, void_centers)
+            objects(environment)[!idx],
+            \(x) in_object(x, void_centers)
         )
     )
     void_centers <- void_centers[within > 0, ] %>% 
@@ -340,12 +340,12 @@ simulate <- function(filename,
     if(sum(idx) > 0) {
         # Translate to data.frame containing the necessary information
         obj <- lapply(
-            predped::objects(environment)[idx],
+            objects(environment)[idx],
             function(x) data.frame(
-                id = predped::id(x), 
-                x = predped::center(x)[1], 
-                y = predped::center(x)[2],
-                ratio = predped::size(x)[1] / predped::size(x)[2]   # Derived what this should be from 'Menu' and 'Fork' examples
+                id = id(x), 
+                x = center(x)[1], 
+                y = center(x)[2],
+                ratio = size(x)[1] / size(x)[2]   # Derived what this should be from 'Menu' and 'Fork' examples
             )
         )
 
@@ -464,7 +464,7 @@ simulate <- function(filename,
         # of arguments to pass along the plot function, we need to add the trace
         # to this list and use do.call to actually perform the plotting.
         movement <- do.call(
-            predped::plot,
+            plot,
             list(trace, "print_progress" = FALSE) %>% 
                 append(plot_args)
         )
@@ -473,28 +473,28 @@ simulate <- function(filename,
         # they are clearly shown in the gif.
         ill_agents <- agent_args$id[agent_args$viral_load == 1]
         env_size <- environment %>% 
-            predped::shape() %>% 
-            predped::size() %>% 
+            shape() %>% 
+            size() %>% 
             max()
 
         for(i in seq_along(trace)) {
             # Retrieve all agents who were currently running around in the 
             # simulation
-            agent_list <- predped::agents(trace[[i]])
+            agent_list <- agents(trace[[i]])
 
             # Loop over all these agents, check whether the agents are ill, and
             # if so, add an X over this agent.
             for(j in agent_list) {                
-                if(predped::id(j) %in% ill_agents) {
+                if(id(j) %in% ill_agents) {
                     movement[[i]] <- movement[[i]] +
                         ggplot2::annotate(
                             "text", 
                             label = "X",
-                            x = predped::position(j)[1],
-                            y = predped::position(j)[2],
-                            color = predped::color(j),
+                            x = position(j)[1],
+                            y = position(j)[2],
+                            color = color(j),
                             hjust = 0.5,
-                            size = 500 * predped::radius(j) / env_size
+                            size = 500 * radius(j) / env_size
                         )
                 }
             }
@@ -535,8 +535,8 @@ simulate <- function(filename,
                     append(
                         list(
                             data[idx, ],
-                            "X.limits" = range(predped::shape(environment)@points[, 1]),
-                            "Y.limits" = range(predped::shape(environment)@points[, 2]),
+                            "X.limits" = range(shape(environment)@points[, 1]),
+                            "Y.limits" = range(shape(environment)@points[, 2]),
                             "Z.label" = "Contamination",
                             "plot.title" = "Air contamination",
                             "legend.position" = "none"
@@ -582,8 +582,8 @@ simulate <- function(filename,
                     append(
                         list(
                             data[idx, ],
-                            "X.limits" = range(predped::shape(environment)@points[, 1]),
-                            "Y.limits" = range(predped::shape(environment)@points[, 2]),
+                            "X.limits" = range(shape(environment)@points[, 1]),
+                            "Y.limits" = range(shape(environment)@points[, 2]),
                             "Z.label" = "Contamination",
                             "plot.title" = "Droplet contamination",
                             "legend.position" = "none"

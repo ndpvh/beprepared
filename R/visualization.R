@@ -15,8 +15,20 @@
 #' \code{c("white", "cornflowerblue")}.
 #' @param Z.label Character denoting the label of the variable \code{Z} to be 
 #' used in the legend. Defaults to \code{"Z"}.
-#' @param Z.limits Numeric vector containing the limits of the heatmap. Defaults 
-#' to the minimum and maximum value of \code{Z}.
+#' @param Z.limits Numeric vector containing the limits of the heatmap in the 
+#' Z dimension. Defaults to the minimum and maximum value of \code{Z} in the 
+#' \code{data}.
+#' @param X.limits,Y.limits Numeric vector containing the limits of the heatmap
+#' in the X and Y dimensions, serving as limits to the plotted figure. Defaults 
+#' to the minimum and maximum value of \code{X} and \code{Y} in the \code{data}.
+#' @param shape.fill Character denoting the fill color of the setting in which 
+#' the agents are running around. Defaults to \code{"grey"} when 
+#' \code{dark_mode = FALSE} and to \code{"black"} otherwise.
+#' @param shape.color Character denoting the color of the boundary of the 
+#' setting in which agents are walking around. Defaults to \code{"black"} when 
+#' \code{dark_mode = FALSE}, and to \code{"white"} otherwise.
+#' @param shape.linewidth Numeric denoting the width of the boundary of the 
+#' setting in which agents are walking around. Defaults to \code{1}.
 #' @param plot.title Character denoting the title fo the plot. Defaults to an 
 #' empty string.
 #' @param plot.title.size Numeric denoting the text size of the plot title.

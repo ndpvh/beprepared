@@ -9,7 +9,7 @@ assign_values(id, parameters)
 \arguments{
 \item{id}{Vector containing the different id's to assign the values to.}
 
-\item{data}{Data.frame containing several columns that denote the parameters 
+\item{parameters}{Data.frame containing several columns that denote the parameters 
 to assign to the QVEmod classes. Should contain a column \code{prob} which 
 contains the probability with which to assign the parameters in that row 
 to a given \code{id}.}
