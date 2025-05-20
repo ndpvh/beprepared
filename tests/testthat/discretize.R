@@ -1,1 +1,0 @@
-ggplot2::ggplot(data = object_segments, ggplot2::aes(x = x1, y = y1, xend = x2, yend = y2)) + ggplot2::geom_segment() + ggplot2::annotate("segment", x = shape_segments$x1, y = shape_segments$y1, xend = shape_segments$x2, yend = shape_segments$y2)
