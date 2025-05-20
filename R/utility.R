@@ -22,7 +22,7 @@ discretize <- function(x,
                        min_x = min(x),
                        dx = 0.1) {
     x %>% 
-        `+` (min_x) %>% 
+        `-` (min_x) %>% 
         `/` (dx) %>% 
         floor() %>% 
         as.integer() %>% 
