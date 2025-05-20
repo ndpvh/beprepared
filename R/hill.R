@@ -17,6 +17,37 @@
 hill_function <- function(exposure, 
                           alpha = 0.332, 
                           lambda = 10^(6.8)) {
+
+    # Make sure all arguments are numeric
+    if(!is.numeric(exposure)) {
+        stop("Argument `exposure` should be numeric.")
+    }
+
+    if(!is.numeric(alpha)) {
+        stop("Argument `exposure` should be numeric.")
+    }
+
+    if(!is.numeric(lambda)) {
+        stop("Argument `exposure` should be numeric.")
+    }
+
+    # Make sure alpha and lambda are single values
+    if(length(alpha) > 1) {
+        stop("Argument `alpha` contains more than 1 value.")
+    }
+
+    if(length(lambda) > 1) {
+        stop("Argument `lambda` contains more than 1 value.")
+    }
+
+    if(length(alpha) == 0) {
+        stop("Argument `alpha` has length 0.")
+    }
+
+    if(length(lambda) == 0) {
+        stop("Argument `lambda` has length 0.")
+    }
     
+    # Actual computation
     return(exposure^alpha / (lambda^alpha + exposure^alpha))
 }
