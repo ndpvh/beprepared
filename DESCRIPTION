@@ -26,7 +26,4 @@ Collate:
 Suggests: 
     fs,
     testthat (>= 3.0.0)
-Remotes: 
-    url::https://github.com/ndpvh/predped, 
-    url::https://git.wur.nl/bosch123/smallscalecorona
 Config/testthat/edition: 3
