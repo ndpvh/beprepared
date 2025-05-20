@@ -1,0 +1,68 @@
+== Agent Based Corona Virus Model ==
+This project attempts to model the intraspatial dynamics of coronavirus transmission. The model is implemented in python3. Unit tests are managed using the nosetests package.
+
+== System Architecture ==
+The model is defined in json files which in turn can be deserialized into the component classes of the model.
+    -Model
+        Contains references to all of the below objects
+        Maintains logic of the model and intra object action
+    -Time Unit
+        The base time unit for the model and model parameters is hours. Accordingly, the unit of SimulationTimeStep is hours. The rate equations and time duration-related equations in the model are defined as functions of SimulationTimeStep.
+    -Agent
+        The 'people' of the model
+        Actions occur during model 'ticks'
+    -Environment
+        A set of 2d arrays that contain the contamination left by agents
+    -Move
+        An instruction that an agent performs during a tick
+        If an agent is idle during a tick, no move present
+
+== Usage ==
+A ini style config file may be passed to Model.run(config_file='myconfig.ini') to override defaults.
+
+[Environment]
+AirCellSize: <int>
+MobilityCellSize: <int>
+AgentReach: <int>
+SimulationTimeStep: <float>
+HandwashingContaminationFraction: <float>
+HandwashingEffectDuration: <int>
+MaskEmissionAerosolReductionEfficiency: <float>
+MaskEmissionDropletReductionEfficiency: <float>
+MaskAerosolProtectionEfficiency: <float>
+MaskDropletProtectionEfficiency: <float>
+CleaningInterval: <int>
+Diffusivity: <float>
+WallAbsorbingProportion: <float>
+CoughingRate: <float>
+CoughingFactor: <int>
+CoughingAerosolPercentage: <float>
+CoughingDropletPercentage: <float>
+
+[Output]
+Suppress: <bool>
+Path: <string>
+AerosolContaminationWriteFrequency: <int>
+AerosolContaminationPrecision: <int>
+DropletContaminationWriteFrequency: <int>
+DropletContaminationPrecision: <int>
+SurfaceContaminationWriteInterval: <int>
+SurfaceContaminationPrecision: <int>
+
+A callback routine may be passed to Model.run(callback=mycallback) to perform post tick actions.
+
+Two keyword parameters are passed to the callback:
+
+1. model: Model  The Model object which gives access to all sub components
+2. tick: int  The current tick number that the simulation is on
+
+The model can be terminated early from within the callback via model.terminate() which will perform cleanup and exit with code 99.
+
+Here is an example callback function:
+
+        def mycallback(model, tick):
+            print(f"Callback for tick: {tick}")
+            if <somecondition>:
+                model.terminate()
+
+        model.run(callback=mycallback)
