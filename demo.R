@@ -4,7 +4,7 @@ source(file.path("environments.R"))
 
 # Do a simulation
 set.seed(1)
-results <- viralpredped::simulate(
+results <- beprepared::simulate(
     "demo",
     environments[["supermarket_1"]],
     iterations = 1000,
@@ -22,4 +22,4 @@ results <- viralpredped::simulate(
 )
 
 # Compute the infection rate through the functions provided by Colin and Busra.
-viralpredped:::infection_risk(results)
+beprepared:::infection_risk(results)

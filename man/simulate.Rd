@@ -10,6 +10,7 @@ simulate(
   archetypes = "BaselineEuropean",
   weights = rep(1/length(archetypes), length(archetypes)),
   dx = 0.1,
+  path = file.path("results"),
   save_gif = FALSE,
   plot_args = list(),
   env_args = data.frame(decay_rate_air = 1.51, decay_rate_droplet = 0.3,
@@ -24,8 +25,8 @@ simulate(
     contamination_load_surface = c(1, 0, 0), emission_rate_air = rep(0.53, 3),
     emission_rate_droplet = rep(0.47, 3), pick_up_air = c(2.3, 30, 30), pick_up_droplet =
     c(2.3, 30, 30), wearing_mask = c(0, 0, 0)),
-  env_config = data.frame(AirCellSize = 50, MobilityCellSize = 100 * dx, AgentReach = 50,
-    SimulationTimeStep = time_step, HandwashingContaminationFraction = 0.3,
+  env_config = data.frame(AirCellSize = 500 * dx, MobilityCellSize = 100 * dx, AgentReach
+    = 500 * dx, SimulationTimeStep = 1/120, HandwashingContaminationFraction = 0.3,
     HandwashingEffectDuration = 0.5, MaskEmissionAerosolReductionEfficiency = 0.4,
     MaskEmissionDropletReductionEfficiency = 0.04, MaskAerosolProtectionEfficiency = 0.4,
     MaskDropletProtectionEfficiency = 0.04, CleaningInterval = 1, Diffusivity = 23,
@@ -33,7 +34,7 @@ simulate(
     CoughingAerosolPercentage = 1, CoughingDropletPercentage = 1, 
     
     SurfaceExposureRatio = 0.01),
-  output_config = data.frame(Suppress = FALSE, Path = file.path("results", "output"),
+  output_config = data.frame(Suppress = FALSE, Path = file.path(path, "output"),
     AerosolContaminationWriteInterval = 15, AerosolContaminationPrecision = 17,
     DropletContaminationWriteInterval = 15, DropletContaminationPrecision = 17,
     SurfaceContaminationWriteInterval = 15, SurfaceContaminationPrecision = 17),
@@ -63,6 +64,9 @@ in meters). This default is based on the contagion patterns of \code{QVEmod}
 which have been parametrized on 10cm. Note that changing this argument is 
 possible and will influence the \code{MobilityCellSize} argument in the 
 \code{env_config} defaults.}
+
+\item{path}{String denoting the path under which to save the results of the 
+simulation. Defaults to a folder "results" under the current directory.}
 
 \item{save_gif}{Logical denoting whether to save a gif of the simulation. 
 Only shows the movement of the agents, not whether they are spreading a 
@@ -95,6 +99,9 @@ configuration of the environment. Defaults to the values found in the
 \item{output_config}{Data.frame containing optional arguments for the 
 configuration of the output Defaults to the values found in the 
 `default_config.json` file of QVEmod.}
+
+\item{time_step}{Numeric denoting the time between each iteration. Defaults 
+to \code{0.5} (the same as in \code{\link[predped]{simulate,predped-method}}).}
 
 \item{...}{Additional arguments passed on to 
 \code{\link[predped]{simulate,predped-method}}}

@@ -3,15 +3,17 @@
 
 #' Compute an agent's infection risk
 #' 
-#' @param data Results coming from the \code{\link[viralpredped]{simulate}} 
+#' @param data Results coming from the \code{\link[beprepared]{simulate}} 
 #' function. Should in the least contain the agent characteristics under 
 #' \code{"agents"} and the exposure of the agents under \code{"agent_exposure"}.
 #' @param time_step Numeric denoting the time between each iteration. Defaults 
 #' to \code{0.5} (the same as in \code{\link[predped]{simulate,predped-method}}).
-#' @param average_emission
-#' @param surface_exposure_ratio 
+#' @param average_emission Numeric denoting the average emission of a virus 
+#' through exposure (air and droplet). Defaults to \code{10^6}.
+#' @param surface_exposure_ratio Numeric denoting a person's exposure to surfaces
+#' per time unit. Defaults to \code{0.01}.
 #' @param fx Function that will translate contamination exposure to risk. 
-#' By default uses the \code{\link[predped]{hill_function}}.
+#' By default uses the \code{\link[beprepared]{hill_function}}.
 #' @param ... Additional arguments passed on to \code{fx}.
 #' 
 #' @return Data.frame containing the agent and their exposure/risk

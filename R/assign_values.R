@@ -1,7 +1,7 @@
 #' Assign values for QVEmod's parameters
 #' 
 #' @param id Vector containing the different id's to assign the values to.
-#' @param data Data.frame containing several columns that denote the parameters 
+#' @param parameters Data.frame containing several columns that denote the parameters 
 #' to assign to the QVEmod classes. Should contain a column \code{prob} which 
 #' contains the probability with which to assign the parameters in that row 
 #' to a given \code{id}.

@@ -4,16 +4,18 @@
 \alias{hill_function}
 \title{Hill function}
 \usage{
-hill_function(exposure, alpha, lambda)
+hill_function(exposure, alpha = 0.332, lambda = 10^(6.8))
 }
 \arguments{
 \item{exposure}{Numeric denoting the total exposure an agent has had to an 
 infectious agent, or otherwise the ligand concentration.}
 
-\item{alpha}{Numeric denoting the Hill coefficient.}
+\item{alpha}{Numeric denoting the Hill coefficient. Defaults to \code{0.332},
+which was taken from code originally written by the QVEmod developers.}
 
 \item{lambda}{Numeric denoting the ligand concentration producing half 
-occupation.}
+occupation. Defaults to \code{10^(6.8)}, which was taken from code originally
+written by the QVEmod developers.}
 }
 \value{
 Numeric denoting the risk of infection
