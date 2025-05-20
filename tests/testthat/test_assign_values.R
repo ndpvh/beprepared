@@ -1,5 +1,5 @@
 testthat::test_that(
-    "Test known errors",
+    "Assign values: Test known errors",
     {
         params <- data.frame(
             prob = rep(1/3, 3),
@@ -46,7 +46,7 @@ testthat::test_that(
 )
 
 testthat::test_that(
-    "Test output",
+    "Assign values: Test output",
     {
         # Simplified version
         params <- data.frame(
