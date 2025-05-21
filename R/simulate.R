@@ -458,7 +458,7 @@ simulate <- function(environment,
         )
     }
 
-    qve_environment <- translate_env(
+    qve_environment <- py$translate_env(
         shape_segments, 
         object_segments,
         void_centers,
@@ -475,7 +475,7 @@ simulate <- function(environment,
         unique(data$goal_id),
         item_args
     )
-    surfaces <- translate_items(
+    surfaces <- py$translate_items(
         discr_data, 
         item_args
     )
@@ -504,7 +504,7 @@ simulate <- function(environment,
             obj$id, 
             surf_args
         )
-        obj <- translate_surf(
+        obj <- py$translate_surf(
             obj, 
             surf_args
         )
@@ -540,7 +540,7 @@ simulate <- function(environment,
         unique(discr_data$id),
         agent_args
     )
-    agents <- translate_data(
+    agents <- py$translate_data(
         discr_data, 
         agent_args
     )
@@ -556,7 +556,7 @@ simulate <- function(environment,
     #---------------------------------------------------------------------------  
 
     # Combine all information in a QVEmod `Model`
-    viral_model <- Model(
+    viral_model <- py$Model(
         as.integer(max(data$iteration) - 1), 
         qve_environment, 
         agents, 
@@ -566,7 +566,7 @@ simulate <- function(environment,
     # Execute the model with the configuration
     # browser()
     cat("\rRunning viral model")
-    run_model(
+    py$run_model(
         viral_model,
         list(env_config, output_config),
         c("env", "output")
@@ -607,6 +607,10 @@ simulate <- function(environment,
         )
     )
 
+    # Delete the obsolete saved data.
+    unlink(file.path(output_config$Path), recursive = TRUE)
+
+    # If the filename is defined, save the results
     if(!is.null(filename)) {
         saveRDS(
             results,
