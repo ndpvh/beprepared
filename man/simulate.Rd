@@ -5,12 +5,12 @@
 \title{Simulate agent movements}
 \usage{
 simulate(
-  filename,
   environment,
   archetypes = "BaselineEuropean",
   weights = rep(1/length(archetypes), length(archetypes)),
   dx = 0.01,
   path = file.path("results"),
+  filename = NULL,
   save_gif = FALSE,
   plot_args = list(),
   env_args = data.frame(decay_rate_air = 1.51, decay_rate_droplet = 0.3,
@@ -43,9 +43,6 @@ simulate(
 )
 }
 \arguments{
-\item{filename}{Character denoting what to call this simulation in the output
-files.}
-
 \item{environment}{Object of the \code{\link[predped]{background-class}} 
 denoting the environment in which agents are to walk around.}
 
@@ -68,6 +65,9 @@ allow changes to this argument yet.}
 
 \item{path}{String denoting the path under which to save the results of the 
 simulation. Defaults to a folder "results" under the current directory.}
+
+\item{filename}{Character denoting what to call this simulation in the output
+files. Defaults to \code{NULL}, meaning results won't be saved.}
 
 \item{save_gif}{Logical denoting whether to save a gif of the simulation. 
 Only shows the movement of the agents, not whether they are spreading a 
@@ -108,8 +108,11 @@ to \code{0.5} (the same as in \code{\link[predped]{simulate,predped-method}}).}
 \code{\link[predped]{simulate,predped-method}}}
 }
 \value{
-Return \code{NULL}. Will save all of the output in different files
-according to the filename provided in the function.
+Named list containing the results of the simulation, where 
+\code{"agents"} contains the viral parameters of the agents, \code{"movement"}
+the positions of the agents at each time step, \code{"aerosol"}, 
+\code{"droplet"}, and \code{"surface"} the contamination of the agents through
+each source, and \code{"agent_exposure"} the total infection risk of the agent
 }
 \description{
 Use the \code{\link[predped]{simulate,predped-method}} function to simulate 
@@ -186,10 +189,11 @@ vectors):
          {the viral load of the agent}
     \item{\code{contamination_load_air}, \code{contamination_load_droplet}, 
           \code{contamination_load_surface}:}
-         {contamination load of the agent through the three different ways to 
-          spread and pick up the virus}
+         {how much the agent comes in contact with a virus through the three 
+          different media}
     \item{\code{emission_rate_air}, \code{emission_rate_droplet}:}
-         {how much the virus is spread through air or droplets}
+         {how much the virus is spread through air or droplets by an infected
+          agent}
     \item{\code{pick_up_air}, \code{pick_up_droplet}:}
          {how much the virus is picked up through air and droplets}
     \item{\code{wearing_mask}:}
