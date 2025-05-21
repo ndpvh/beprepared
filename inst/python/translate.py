@@ -327,13 +327,13 @@ def translate_surf(objects,
     surfaces = []
     for i, row in objects.iterrows():
         # Create the Fixture and add to the list
-        surf_args = select(surf_specifications, i)
+        surf_args = select(surf_specifications, row['id'])
         surfaces.append(
             Fixture(
                 row['id'],
                 row['x'], 
                 row['y'],
-                surf_args['transfer_efficiency'].values[0], 
+                surf_args['transfer_decay_rate'].values[0], 
                 row['ratio'].values[0],
                 surf_args['touch_frequency'].values[0], 
                 surf_args['surface_decay_rate'].values[0]
