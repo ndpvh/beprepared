@@ -1,3 +1,6 @@
+import numpy as np
+from utility import dfs_to_object
+
 def run_model(model, 
               configs, 
               keys):
