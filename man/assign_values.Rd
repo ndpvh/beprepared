@@ -10,9 +10,9 @@ assign_values(id, parameters)
 \item{id}{Vector containing the different id's to assign the values to.}
 
 \item{parameters}{Data.frame containing several columns that denote the parameters 
-to assign to the QVEmod classes. Should contain a column \code{prob} which 
-contains the probability with which to assign the parameters in that row 
-to a given \code{id}.}
+to assign to the QVEmod classes. Should at least contain a column \code{prob} 
+which contains the probability with which to assign the parameters in that row 
+to a random \code{id}.}
 }
 \value{
 Data.frame containing the \code{id}s and their assigned values for 

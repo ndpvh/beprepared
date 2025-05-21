@@ -9,7 +9,7 @@ simulate(
   environment,
   archetypes = "BaselineEuropean",
   weights = rep(1/length(archetypes), length(archetypes)),
-  dx = 0.1,
+  dx = 0.01,
   path = file.path("results"),
   save_gif = FALSE,
   plot_args = list(),
@@ -25,8 +25,8 @@ simulate(
     contamination_load_surface = c(1, 0, 0), emission_rate_air = rep(0.53, 3),
     emission_rate_droplet = rep(0.47, 3), pick_up_air = c(2.3, 30, 30), pick_up_droplet =
     c(2.3, 30, 30), wearing_mask = c(0, 0, 0)),
-  env_config = data.frame(AirCellSize = 500 * dx, MobilityCellSize = 100 * dx, AgentReach
-    = 500 * dx, SimulationTimeStep = 1/120, HandwashingContaminationFraction = 0.3,
+  env_config = data.frame(AirCellSize = 500, MobilityCellSize = 100, AgentReach = 500,
+    SimulationTimeStep = 1/(120 * 30), HandwashingContaminationFraction = 0.3,
     HandwashingEffectDuration = 0.5, MaskEmissionAerosolReductionEfficiency = 0.4,
     MaskEmissionDropletReductionEfficiency = 0.04, MaskAerosolProtectionEfficiency = 0.4,
     MaskDropletProtectionEfficiency = 0.04, CleaningInterval = 1, Diffusivity = 23,
@@ -58,12 +58,13 @@ weighing of each entry in \code{archetypes}.}
 
 \item{dx}{Numeric denoting the width and height of each cell in the simulation.
 While \code{predped} operates on continuous space, \code{QVEmod} requires 
-this space to consist of discretized cells. Defaults to \code{0.1}, which 
-should be interpreted as 10cm (i.e., the units of the \code{environment} are 
-in meters). This default is based on the contagion patterns of \code{QVEmod}
-which have been parametrized on 10cm. Note that changing this argument is 
-possible and will influence the \code{MobilityCellSize} argument in the 
-\code{env_config} defaults.}
+this space to consist of discretized cells. This argument is therefore 
+multiplied with the values of \code{AirCellSize}, \code{MobilityCellSize}, 
+and \code{AgentReach}. Defaults to \code{0.01}, which should be interpreted as
+1cm, making \code{dx} in meters (i.e., just like the units of 
+\code{environment}). This default is based on the contagion patterns of 
+\code{QVEmod}, which are defined in cm as a unit. Note that QVEmod doesn't 
+allow changes to this argument yet.}
 
 \item{path}{String denoting the path under which to save the results of the 
 simulation. Defaults to a folder "results" under the current directory.}
@@ -116,4 +117,123 @@ agent movements and assess the risk of infection for each of the agents in
 the simulation. Combines the different steps that you would normally have 
 to go through in one function, allowing one to simulate data with minimal 
 effort.
+}
+\details{
+This function allows for simulating viral disease spread through a 
+combination two simulation models, namely the M4MA pedestrian model
+(which governs walking behavior) and the QVE viral disease spread
+model (which governs disease spread). The packages surrounding these models 
+are used for the simulation and allow for a lot of personalization, providing
+a lot of flexibility on the side of the user. In what follows, one will see 
+which parameters can be changed and for what purposes.
+
+With regard to the M4MA, one can change all of the arguments of the 
+\code{\link[predped]{simulate,predped-method}} function from the \code{predped}
+package by calling them as an independent argument. For example, if one wants
+to change the number of iterations of the simulation to \code{1000}, one 
+should call \code{simulate(<filename>, <environment>, iterations = 1000)}, 
+where \code{<filename>} and \code{<environment>} are a user-provided filename
+and environment in which the agents have to walk around. 
+
+For a full list of arguments that can be used to tweak the walking simulation, 
+we refer to the documentation of the 
+\code{\link[predped]{simulate,predped-method}} function. Here, we only list 
+the most interesting arguments:
+
+\itemize{
+    \item{\code{iterations}:}
+         {integer, the number of the iterations the simulation should run}
+    \item{\code{max_agents}:}
+         {integer, the number of agents that are maximally allowed in the room}
+    \item{\code{add_agent_after}:}
+         {integer, the minimal number of iterations between each agent 
+          entering the space}
+    \item{\code{goal_number}:}
+         {integer or function, the number of goals each agent will have in 
+          the simulation (if integer) or a function that determines this 
+          number through random sampling, taking in a single argument for the 
+          number of draws to sample (e.g., \code{function(x) rnorm(x, 10, 2)})}
+    \item{\code{goal_duration}:}
+         {integer or function, determines the number of iterations it takes 
+          to complete a goal in the same way as for \code{goal_number}}
+    \item{\code{individual_differences}:}
+         {logical, whether the parameters of the agents are allowed to differ 
+          slightly between agents}
+    \item{\code{fx}:}
+         {function, a function that is executed at each iteration, allowing 
+          the user to change a given state of the simulation, influencing the 
+          future of the simulation (e.g., useful to invoke evacuation 
+          behavior)}
+    \item{\code{print_iterations}:}
+         {logical, whether to print at which iteration the model is currently}
+}
+
+With regard to QVE, one can change most of the characteristics that guide the 
+viral disease spread. These characteristics have been neatly categorized 
+according to the object to which they apply, namely to the agents, environment, 
+surfaces, and items, each through supplying a \code{data.frame} to the 
+respective arguments \code{agent_args}, \code{env_args}, \code{surf_args}, 
+and \code{item_args}. Importantly, these \code{data.frame}s should all be 
+fully specified for the code to work, meaning that you should specify all 
+parameters if you wish to change the defaults.
+
+The \code{agent_args} take in the following specifications (all numeric 
+vectors):
+\itemize{
+    \item{\code{prob}:}
+         {probability of assigning this parameter set to an agent}
+    \item{\code{viral_load}:}
+         {the viral load of the agent}
+    \item{\code{contamination_load_air}, \code{contamination_load_droplet}, 
+          \code{contamination_load_surface}:}
+         {contamination load of the agent through the three different ways to 
+          spread and pick up the virus}
+    \item{\code{emission_rate_air}, \code{emission_rate_droplet}:}
+         {how much the virus is spread through air or droplets}
+    \item{\code{pick_up_air}, \code{pick_up_droplet}:}
+         {how much the virus is picked up through air and droplets}
+    \item{\code{wearing_mask}:}
+         {whether the agent is wearing a mask, indicated by a 0 (for false) or
+          a 1 (for true)}
+}
+
+The \code{env_args} take in the following specifications (singular numerics):
+\itemize{
+    \item{\code{decay_rate_air}, \code{decay_rate_droplet}, \code{decay_rate_surface}:}
+         {how much the contamination decays across media}
+    \item{\code{air_exchange_rate}:}
+         {how much the air in the room is refreshed}
+    \item{\code{droplet_to_surface_transfer_rate}:}
+         {how much contamination in the droplets is transferred to a surface}
+}
+
+The \code{surf_args} take in the following specifications (numeric vectors):
+\itemize{
+    \item{\code{prob}:}
+         {probability of assigning a given set of surface parameters to a 
+          particular surface in the environment}
+    \item{\code{transfer_decay_rate}:}
+         {how much contamination on the surface decays on touch}
+    \item{\code{touch_frequency}:}
+         {how often agents touch the surface}
+    \item{\code{surface_decay_rate}:}
+         {how much contamination on the surface decays}
+}
+
+The \code{item_args} take in the following specifications (numeric vectors):
+\itemize{
+    \item{\code{prob}:}
+         {probability of assigning a given set of item parameters to a 
+          particular goal that the agent has accomplished}
+    \item{\code{transfer_decay_rate}:}
+         {how much contamination on the item decays on touch}
+    \item{\code{surface_ratio}:}
+         {ratio of the height vs the width of the item}
+    \item{\code{surface_decay_rate}:}
+         {how much contamination on the surface of the item decays}
+}
+
+For full information on the arguments one can change and examples, we refer 
+the interested reader to the documentations of \code{predped} and 
+\code{QVEmod}.
 }
