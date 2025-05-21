@@ -74,10 +74,11 @@
 #'          {the viral load of the agent}
 #'     \item{\code{contamination_load_air}, \code{contamination_load_droplet}, 
 #'           \code{contamination_load_surface}:}
-#'          {contamination load of the agent through the three different ways to 
-#'           spread and pick up the virus}
+#'          {how much the agent comes in contact with a virus through the three 
+#'           different media}
 #'     \item{\code{emission_rate_air}, \code{emission_rate_droplet}:}
-#'          {how much the virus is spread through air or droplets}
+#'          {how much the virus is spread through air or droplets by an infected
+#'           agent}
 #'     \item{\code{pick_up_air}, \code{pick_up_droplet}:}
 #'          {how much the virus is picked up through air and droplets}
 #'     \item{\code{wearing_mask}:}
@@ -520,20 +521,19 @@ simulate <- function(environment,
     # execute them. Importantly, movement is relative to the previous position,
     # meaning that we first need to make it so. 
     discr_data <- discr_data %>% 
-        dplyr::group_by(id) %>% 
         dplyr::arrange(id, time) %>% 
+        dplyr::group_by(id) %>% 
+        tidyr::nest() %>% 
         dplyr::mutate(
-            x = ifelse(
-                length(x) > 1, 
-                c(x[1], x[2:length(x)] - x[2:length(x) - 1]),
-                x[1]
-            ),
-            y = ifelse(
-                length(y) > 1,
-                c(y[1], y[2:length(y)] - y[2:length(y) - 1]),
-                y[1]
-            )
+            data = data %>% 
+                as.data.frame() %>% 
+                dplyr::mutate(
+                    x = relative_movement(x),
+                    y = relative_movement(y)
+                ) %>% 
+                list()
         ) %>% 
+        tidyr::unnest(data) %>% 
         dplyr::ungroup()
 
     agent_args <- assign_values(
@@ -557,7 +557,7 @@ simulate <- function(environment,
 
     # Combine all information in a QVEmod `Model`
     viral_model <- Model(
-        as.integer(max(data$iteration)), 
+        as.integer(max(data$iteration) - 1), 
         qve_environment, 
         agents, 
         surfaces = surfaces
