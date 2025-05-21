@@ -17,12 +17,13 @@
 #' weighing of each entry in \code{archetypes}.
 #' @param dx Numeric denoting the width and height of each cell in the simulation.
 #' While \code{predped} operates on continuous space, \code{QVEmod} requires 
-#' this space to consist of discretized cells. Defaults to \code{0.1}, which 
-#' should be interpreted as 10cm (i.e., the units of the \code{environment} are 
-#' in meters). This default is based on the contagion patterns of \code{QVEmod}
-#' which have been parametrized on 10cm. Note that changing this argument is 
-#' possible and will influence the \code{MobilityCellSize} argument in the 
-#' \code{env_config} defaults.
+#' this space to consist of discretized cells. This argument is therefore 
+#' multiplied with the values of \code{AirCellSize}, \code{MobilityCellSize}, 
+#' and \code{AgentReach}. Defaults to \code{0.01}, which should be interpreted as
+#' 1cm, making \code{dx} in meters (i.e., just like the units of 
+#' \code{environment}). This default is based on the contagion patterns of 
+#' \code{QVEmod}, which are defined in cm as a unit. Note that QVEmod doesn't 
+#' allow changes to this argument yet.
 #' @param path String denoting the path under which to save the results of the 
 #' simulation. Defaults to a folder "results" under the current directory.
 #' @param save_gif Logical denoting whether to save a gif of the simulation. 
@@ -70,7 +71,7 @@ simulate <- function(filename,
                      environment, 
                      archetypes = "BaselineEuropean", 
                      weights = rep(1 / length(archetypes), length(archetypes)), 
-                     dx = 0.1,
+                     dx = 0.01,
                      path = file.path("results"),
                      save_gif = FALSE,
                      plot_args = list(),
@@ -106,10 +107,10 @@ simulate <- function(filename,
                         wearing_mask = c(0, 0, 0)
                      ),
                      env_config = data.frame(
-                        AirCellSize = 500 * dx,
-                        MobilityCellSize = 100 * dx,
-                        AgentReach = 500 * dx,
-                        SimulationTimeStep = 1/120,
+                        AirCellSize = 500,
+                        MobilityCellSize = 100,
+                        AgentReach = 500,
+                        SimulationTimeStep = 1/(120 * 60),
                         HandwashingContaminationFraction = 0.3,
                         HandwashingEffectDuration = 0.5,
                         MaskEmissionAerosolReductionEfficiency = 0.4,
@@ -190,6 +191,11 @@ simulate <- function(filename,
     )
     check_columns(cols, colnames(item_args), "`item_args`")
 
+    # Multiply the discretization space in the env_args with dx, putting it on 
+    # the meter scale
+    env_args$AirCellSize <- env_args$AirCellSize * dx
+    env_args$MobilityCellSize <- env_args$MobilityCellSize * dx
+    env_args$AgentReach <- env_args$AgentReach * dx
 
 
 
