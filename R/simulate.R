@@ -419,30 +419,43 @@ simulate <- function(environment,
 
     # We also need to impose Voids in the environment. Importantly, these are 
     # defined on the air-cell level, not on the general space level.
-    env_size <- environment %>% 
-        predped::shape() %>% 
-        size()
+    #
+    # Note that if there are only surfaces in the environment, no void centers 
+    # exist (they only exist in unreachable spaces)
+    if(sum(!idx) > 1) {
+        env_size <- environment %>% 
+            predped::shape() %>% 
+            size()
 
-    air_dx <- (env_config$AirCellSize / env_config$MobilityCellSize) * dx
-    x <- seq(air_dx/2, env_size[1] - air_dx/2, by = air_dx)
-    y <- seq(air_dx/2, env_size[2] - air_dx/2, by = air_dx)
-    void_centers <- cbind(
-        rep(x, each = length(y)),
-        rep(y, times = length(x))
-    )
-    within <- rowSums(
-        sapply(
-            predped::objects(environment)[!idx],
-            \(x) in_object(x, void_centers)
+        air_dx <- (env_config$AirCellSize / env_config$MobilityCellSize) * dx
+        x <- seq(air_dx/2, env_size[1] - air_dx/2, by = air_dx)
+        y <- seq(air_dx/2, env_size[2] - air_dx/2, by = air_dx)
+        void_centers <- cbind(
+            rep(x, each = length(y)),
+            rep(y, times = length(x))
         )
-    )
-    void_centers <- void_centers[within > 0, ] %>% 
-        as.data.frame() %>% 
-        setNames(c("x", "y")) %>% 
-        dplyr::mutate(
-            x = as.integer((x - air_dx/2) / air_dx),
-            y = as.integer((y - air_dx/2) / air_dx)
+
+        within <- rowSums(
+            sapply(
+                predped::objects(environment)[!idx],
+                \(x) predped::in_object(x, void_centers)
+            )
         )
+
+         void_centers <- void_centers[within > 0, ] %>% 
+            as.data.frame() %>% 
+            setNames(c("x", "y")) %>% 
+            dplyr::mutate(
+                x = as.integer((x - air_dx/2) / air_dx),
+                y = as.integer((y - air_dx/2) / air_dx)
+            )
+
+    } else {
+        void_centers <- data.frame(
+            x = integer(0),
+            y = integer(0)
+        )
+    }
 
     qve_environment <- translate_env(
         shape_segments, 
@@ -505,8 +518,16 @@ simulate <- function(environment,
         dplyr::group_by(id) %>% 
         dplyr::arrange(id, time) %>% 
         dplyr::mutate(
-            x = c(x[1], x[2:length(x)] - x[2:length(x) - 1]),
-            y = c(y[1], y[2:length(y)] - y[2:length(y) - 1])
+            x = ifelse(
+                length(x) > 1, 
+                c(x[1], x[2:length(x)] - x[2:length(x) - 1]),
+                x[1]
+            ),
+            y = ifelse(
+                length(y) > 1,
+                c(y[1], y[2:length(y)] - y[2:length(y) - 1]),
+                y[1]
+            )
         ) %>% 
         dplyr::ungroup()
 
@@ -538,6 +559,7 @@ simulate <- function(environment,
     )
 
     # Execute the model with the configuration
+    # browser()
     cat("\rRunning viral model")
     run_model(
         viral_model,
