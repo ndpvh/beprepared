@@ -219,6 +219,9 @@ def translate_env(shape,
         In practice consists of all those objects that block contaminants.
         Importantly, should contain a segment per row, defined by an initial 
         starting position ("x1", "y1") and an ending position ("x2", "y2").
+    void_centers: dataframe
+        R data.frame that contains all positions that fall within inpenetrable 
+        objects in its rows, having column names ("x", "y").
     env_specifications: dataframe
         R data.frame of a single row that contains all of the parameters
         required by `QVEmod`s `Environment` class. 
