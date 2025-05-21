@@ -57,7 +57,7 @@ segmentize <- function(object,
                         
     # Create the segments
     object <- object %>% 
-        points() %>% 
+        predped::points() %>% 
         as.data.frame() %>% 
         setNames(c("x", "y")) %>% 
         dplyr::mutate(
