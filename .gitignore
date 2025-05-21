@@ -1,5 +1,5 @@
 figures/
-results/
+results/*
 *.out
 
 */*/__pycache__/*
@@ -10,3 +10,4 @@ results/
 .DS_Store
 test.gif
 test.Rds
+tests/testthat/results/output/*
