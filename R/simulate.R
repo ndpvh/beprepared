@@ -358,7 +358,7 @@ simulate <- function(environment,
     # Get all surfaces out of the objects list
     idx <- sapply(
         predped::objects(environment), 
-        function(x) grepl("surface", id(x), fixed = TRUE)
+        function(x) grepl("surface", predped::id(x), fixed = TRUE)
     )
 
     # Get the value to use as the value for `min_x` in `discretize`. This value 
