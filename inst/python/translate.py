@@ -334,7 +334,7 @@ def translate_surf(objects,
                 row['x'], 
                 row['y'],
                 surf_args['transfer_decay_rate'].values[0], 
-                row['ratio'].values[0],
+                row['ratio'],
                 surf_args['touch_frequency'].values[0], 
                 surf_args['surface_decay_rate'].values[0]
             )
