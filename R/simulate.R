@@ -125,8 +125,6 @@
 #' the interested reader to the documentations of \code{predped} and 
 #' \code{QVEmod}.
 #' 
-#' @param filename Character denoting what to call this simulation in the output
-#' files. 
 #' @param environment Object of the \code{\link[predped]{background-class}} 
 #' denoting the environment in which agents are to walk around.
 #' @param archetypes Character vector denoting the parameter sets of 
@@ -145,6 +143,8 @@
 #' allow changes to this argument yet.
 #' @param path String denoting the path under which to save the results of the 
 #' simulation. Defaults to a folder "results" under the current directory.
+#' @param filename Character denoting what to call this simulation in the output
+#' files. Defaults to \code{NULL}, meaning results won't be saved.
 #' @param save_gif Logical denoting whether to save a gif of the simulation. 
 #' Only shows the movement of the agents, not whether they are spreading a 
 #' disease. Defaults to \code{FALSE}.
@@ -174,8 +174,11 @@
 #' @param ... Additional arguments passed on to 
 #' \code{\link[predped]{simulate,predped-method}}
 #' 
-#' @return Return \code{NULL}. Will save all of the output in different files
-#' according to the filename provided in the function. 
+#' @return Named list containing the results of the simulation, where 
+#' \code{"agents"} contains the viral parameters of the agents, \code{"movement"}
+#' the positions of the agents at each time step, \code{"aerosol"}, 
+#' \code{"droplet"}, and \code{"surface"} the contamination of the agents through
+#' each source, and \code{"agent_exposure"} the total infection risk of the agent
 #' 
 #' @export 
 #
@@ -186,12 +189,12 @@
 #     not have surfaced goals
 #   - For Fixtures, taken from the "Table" in the example in main.py
 #   - For Agent, taken from the three cases in the example of main.py
-simulate <- function(filename, 
-                     environment, 
+simulate <- function(environment, 
                      archetypes = "BaselineEuropean", 
                      weights = rep(1 / length(archetypes), length(archetypes)), 
                      dx = 0.01,
                      path = file.path("results"),
+                     filename = NULL, 
                      save_gif = FALSE,
                      plot_args = list(),
                      env_args = data.frame(
@@ -310,11 +313,11 @@ simulate <- function(filename,
     )
     check_columns(cols, colnames(item_args), "`item_args`")
 
-    # Multiply the discretization space in the env_args with dx, putting it on 
+    # Multiply the discretization space in the env_config with dx, putting it on 
     # the meter scale
-    env_args$AirCellSize <- env_args$AirCellSize * dx
-    env_args$MobilityCellSize <- env_args$MobilityCellSize * dx
-    env_args$AgentReach <- env_args$AgentReach * dx
+    env_config$AirCellSize <- env_config$AirCellSize * dx
+    env_config$MobilityCellSize <- env_config$MobilityCellSize * dx
+    env_config$AgentReach <- env_config$AgentReach * dx
 
     # Multiply the time_step with the env_config times
     env_config$SimulationTimeStep <- env_config$SimulationTimeStep * time_step
@@ -327,15 +330,15 @@ simulate <- function(filename,
     #---------------------------------------------------------------------------
 
     # Define the predped model to use for the simulation
-    model <- predped(
+    model <- predped::predped(
         setting = environment, 
         archetypes = archetypes, 
         weights = weights
     )
 
     # Actually do the simulation and transform the data to a time-series format.
-    trace <- simulate(model, time_step = time_step, ...)
-    data <- time_series(trace)
+    trace <- predped::simulate(model, time_step = time_step, ...)
+    data <- predped::time_series(trace)
 
     # Add an indicator that says whether the agent has performed their goal or 
     # not. Used in the translation functions
@@ -353,7 +356,7 @@ simulate <- function(filename,
 
     # Get all surfaces out of the objects list
     idx <- sapply(
-        objects(environment), 
+        predped::objects(environment), 
         function(x) grepl("surface", id(x), fixed = TRUE)
     )
 
@@ -361,8 +364,8 @@ simulate <- function(filename,
     # corresponds to the minimal value of `x` and `y` extracted from the shape
     # of the environment.
     origin <- environment %>% 
-        shape() %>% 
-        points() %>% 
+        predped::shape() %>% 
+        predped::points() %>% 
         matrixStats::colMins()
 
     # Discretize the relevant positions in the data, them being the positions of 
@@ -396,7 +399,7 @@ simulate <- function(filename,
     # translate them to Walls and Barriers using the Python-defined translate 
     # function, as expected by the QVEmod functions.
     shape_segments <- environment %>% 
-        shape() %>% 
+        predped::shape() %>% 
         segmentize(
             discretize = TRUE,
             origin = origin,
@@ -404,7 +407,7 @@ simulate <- function(filename,
         ) 
 
     object_segments <- lapply(
-        objects(environment)[!idx],
+        predped::objects(environment)[!idx],
         \(x) segmentize(
             x, 
             discretize = TRUE,
@@ -417,7 +420,7 @@ simulate <- function(filename,
     # We also need to impose Voids in the environment. Importantly, these are 
     # defined on the air-cell level, not on the general space level.
     env_size <- environment %>% 
-        shape() %>% 
+        predped::shape() %>% 
         size()
 
     air_dx <- (env_config$AirCellSize / env_config$MobilityCellSize) * dx
@@ -429,7 +432,7 @@ simulate <- function(filename,
     )
     within <- rowSums(
         sapply(
-            objects(environment)[!idx],
+            predped::objects(environment)[!idx],
             \(x) in_object(x, void_centers)
         )
     )
@@ -468,7 +471,7 @@ simulate <- function(filename,
     if(sum(idx) > 0) {
         # Translate to data.frame containing the necessary information
         obj <- lapply(
-            objects(environment)[idx],
+            predped::objects(environment)[idx],
             function(x) data.frame(
                 id = id(x), 
                 x = center(x)[1], 
@@ -577,10 +580,12 @@ simulate <- function(filename,
         )
     )
 
-    saveRDS(
-        results,
-        file.path(path, paste0(filename, ".Rds"))
-    )
+    if(!is.null(filename)) {
+        saveRDS(
+            results,
+            file.path(path, paste0(filename, ".Rds"))
+        )
+    }
 
     # If you want to save the gif of this simulation, do so
     if(save_gif) {
