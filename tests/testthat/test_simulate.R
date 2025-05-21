@@ -71,3 +71,44 @@ testthat::test_that(
         # Also for agent_args?
     }
 )
+
+testthat::test_that(
+    "Simulate: Test of output",
+    {
+        # Mock environment
+        env <- predped::background(
+            shape = predped::rectangle(center = c(0, 0), size = c(5, 5)),
+            objects = list(
+                predped::rectangle(
+                    id = "surface", 
+                    center = c(0, 0), 
+                    size = c(1, 1)
+                )
+            ),
+            entrance = c(-2.5, 0)
+        )
+
+        # Do a simulation
+        set.seed(1)
+        output <- invisible(
+            capture.output(
+                results <- beprepared::simulate(
+                     env,
+                     iterations = 25,
+                     max_agents = 5,
+                     add_agent_after = 1
+                ) 
+            )
+        )
+
+        # Compare the different parts in results to the reference
+        ref <- readRDS(file.path("results", "ref_simulate.Rds"))
+
+        testthat::expect_equal(results[["agents"]], ref[["agents"]], tolerance = 1e-4)
+        testthat::expect_equal(results[["movement"]], ref[["movement"]], tolerance = 1e-4)
+        testthat::expect_equal(results[["aerosol"]], ref[["aerosol"]], tolerance = 1e-4)
+        testthat::expect_equal(results[["droplet"]], ref[["droplet"]], tolerance = 1e-4)
+        testthat::expect_equal(results[["surface"]], ref[["surface"]], tolerance = 1e-4)
+        testthat::expect_equal(results[["agent_exposure"]], ref[["agent_exposure"]], tolerance = 1e-4)
+    }
+)
