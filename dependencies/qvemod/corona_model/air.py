@@ -3,6 +3,19 @@ from typing import List, Tuple, Union, Dict
 from enum import auto, Enum
 from copy import deepcopy
 
+# Add the QVEmod package to the system path. Needed to import corona_model as 
+# a module
+import sys
+import os
+filename = os.path.join(
+    os.path.dirname(__file__),
+    ".."
+)
+
+if not filename in sys.path:
+    sys.path.append(filename)
+
+# Load the corona_model dependencies
 from corona_model.facing import Facing
 from corona_model.barriers import Wall, Shield
 from corona_model.emissionpatterns import EmissionPattern

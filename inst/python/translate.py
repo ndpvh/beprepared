@@ -1,17 +1,25 @@
-import os
 import pandas as pd
 import numpy as np
 import math
 
+# Add the QVEmod package to the system path. Needed to import corona_model as 
+# a module
+import sys
+import os
+filename = os.path.join(
+    os.path.dirname(__file__),
+    "../../dependencies/qvemod"
+)
+
+if not filename in sys.path:
+    sys.path.append(filename)
+
 # Import the needed classes from QVEmod
-os.chdir("dependencies/qvemod")
 from corona_model.agent import Agent
 from corona_model.environment import Environment
 from corona_model.air import Wall, Shield, Void, EmissionPattern
-from corona_model.model import Model
 from corona_model.actions import *
 from corona_model.surfaces import Item, Fixture
-os.chdir("../../")
 
 from utility import select
 

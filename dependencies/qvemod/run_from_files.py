@@ -1,6 +1,19 @@
 import argparse
 from json import loads, dumps
 
+# Add the QVEmod package to the system path. Needed to import corona_model as 
+# a module
+import sys
+import os
+filename = os.path.join(
+    os.path.dirname(__file__),
+    "../../dependencies/qvemod"
+)
+
+if not filename in sys.path:
+    sys.path.append(filename)
+
+# Load the corona_model dependencies
 from corona_model.agent import Agent
 from corona_model.environment import Environment
 from corona_model.model import Model
