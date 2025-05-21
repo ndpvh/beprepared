@@ -100,3 +100,45 @@ testthat::test_that(
         testthat::expect_equal(tst, ref)
     }
 )
+
+testthat::test_that(
+    "Relative movement: Test known errors",
+    {
+        testthat::expect_error(
+            beprepared::relative_movement("test")
+        )
+
+        testthat::expect_error(
+            beprepared::relative_movement(TRUE)
+        )
+    }
+)
+
+testthat::test_that(
+    "Relative movement: Test output",
+    {
+        # No values
+        tst <- beprepared::relative_movement(numeric(0))
+        ref <- numeric(0)
+
+        testthat::expect_equal(tst, ref)
+
+        # Single value
+        tst <- beprepared::relative_movement(1)
+        ref <- 1
+
+        testthat::expect_equal(tst, ref)
+
+        # Two values 
+        tst <- beprepared::relative_movement(1:2)
+        ref <- c(1, 1)
+
+        testthat::expect_equal(tst, ref)
+
+        # Three values
+        tst <- beprepared::relative_movement(1:3)
+        ref <- c(1, 1, 1)
+
+        testthat::expect_equal(tst, ref)
+    }
+)

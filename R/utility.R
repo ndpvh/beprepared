@@ -97,3 +97,31 @@ segmentize <- function(object,
         
     return(object)
 }
+
+#' Compute movement relative to previous position
+#' 
+#' @param x Numeric vector containing values that should be made relative to 
+#' each other.
+#' 
+#' @return Numeric vector containing movements relative to the previous ones
+#' 
+#' @export
+relative_movement <- function(x) {
+    # Check input
+    if(!is.numeric(x)) {
+        stop("Argument `x` should be numeric.")
+    }
+
+    # If there is only one value, we just return that singular value. Otherwise,
+    # we return relative positions
+    if(length(x) <= 1) {
+        return(x)
+    } else {
+        return(
+            c(
+                x[1],
+                x[2:length(x)] - x[2:length(x) - 1]
+            )
+        )
+    }
+}
