@@ -331,8 +331,8 @@ def translate_surf(objects,
         surfaces.append(
             Fixture(
                 row['id'],
-                row['x'], 
-                row['y'],
+                int(row['x']), 
+                int(row['y']),
                 surf_args['transfer_decay_rate'].values[0], 
                 row['ratio'],
                 surf_args['touch_frequency'].values[0], 
