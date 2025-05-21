@@ -486,12 +486,17 @@ simulate <- function(environment,
         obj <- lapply(
             predped::objects(environment)[idx],
             function(x) data.frame(
-                id = id(x), 
-                x = center(x)[1], 
-                y = center(x)[2],
-                ratio = size(x)[1] / size(x)[2]   # Derived what this should be from 'Menu' and 'Fork' examples
+                id = predped::id(x), 
+                x = predped::center(x)[1], 
+                y = predped::center(x)[2],
+                ratio = ifelse(
+                    inherits(x, "circle"),
+                    1,
+                    predped::size(x)[1] / predped::size(x)[2]   # Derived what this should be from 'Menu' and 'Fork' examples
+                )
             )
         )
+        obj <- do.call("rbind", obj)
 
         # Assign parameter values and then translate the data.frame to `Fixture`s
         surf_args <- assign_values(
