@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import math
 
+
 from corona_model.agent import Agent
 from corona_model.environment import Environment
 from corona_model.air import Wall, Shield, Void, EmissionPattern
@@ -184,6 +185,10 @@ def translate_items(time_series,
     # Loop over the goals
     items = []
     for i in goal_id:
+        # Delete all exit goals from this list, they do not count
+        if 'goal exit' in i: 
+            continue 
+
         # Select a single goal
         df = time_series.loc[time_series['goal_id'] == i]
 
