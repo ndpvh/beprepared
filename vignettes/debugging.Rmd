@@ -1,0 +1,15 @@
+---
+title: "Debugging"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Debugging}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# predped 
+
+There are some known issues or limitations that are inherent to `predped`, namely:
+
+- Instances of `segment` cannot be included in the list provided to the `objects` argument of the `background` class. These `segment`s exist only to limit the directionality of the pedestrian flow and should therefore always be included in the `limited_access` argument instead;
+- The `plot` method unfortunately masks the `plot` function in base R. It is thus possible that this function will not work under its normal conditions when `predped` is loaded. To get around this issue, we recommend specifying which `plot` function you want to use by including the package from which it is derived, that is to use `base::plot` or `predped::plot` in your code.
