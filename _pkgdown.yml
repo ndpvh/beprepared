@@ -16,6 +16,8 @@ navbar:
         href: articles/background.html
       - text: Environments
         href: articles/environments.html
+      - text: Agents
+        href: articles/agents.html
       - text: Simulations
         href: articles/simulations.html
       - text: Example
