@@ -10,7 +10,7 @@ navbar:
   structure:
   components:
     articles:
-      text: How to use
+      text: Usage
       menu:
       - text: Background
         href: articles/background.html
