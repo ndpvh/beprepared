@@ -198,7 +198,7 @@ def translate_items(time_series,
                 i, 
                 x, 
                 y, 
-                item_args['transfer_decay_rate'].values[0],
+                item_args['transfer_efficiency'].values[0],
                 item_args['surface_ratio'].values[0],
                 item_args['surface_decay_rate'].values[0]
             )
@@ -345,7 +345,7 @@ def translate_surf(objects,
                 row['id'],
                 int(row['x']), 
                 int(row['y']),
-                surf_args['transfer_decay_rate'].values[0], 
+                surf_args['transfer_efficiency'].values[0], 
                 row['ratio'],
                 surf_args['touch_frequency'].values[0], 
                 surf_args['surface_decay_rate'].values[0]
