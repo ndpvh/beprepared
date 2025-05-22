@@ -435,11 +435,26 @@ simulate <- function(environment,
     if(sum(!idx) > 1) {
         env_size <- environment %>% 
             predped::shape() %>% 
-            size()
+            predped::size()
+        env_center <- environment %>% 
+            predped::shape() %>% 
+            predped::center()
+        
+        if(length(env_size) == 1) {
+            env_size <- rep(env_size, 2) * 2
+        }
 
         air_dx <- (env_config$AirCellSize / env_config$MobilityCellSize) * dx
-        x <- seq(air_dx/2, env_size[1] - air_dx/2, by = air_dx)
-        y <- seq(air_dx/2, env_size[2] - air_dx/2, by = air_dx)
+        x <- seq(
+            env_center[1] - env_size[1]/2 + air_dx/2, 
+            env_center[1] + env_size[1]/2 - air_dx/2, 
+            by = air_dx
+        )
+        y <- seq(
+            env_center[2] - env_size[2]/2 + air_dx/2, 
+            env_center[2] + env_size[2]/2 - air_dx/2, 
+            by = air_dx
+        )
         void_centers <- cbind(
             rep(x, each = length(y)),
             rep(y, times = length(x))
@@ -452,12 +467,13 @@ simulate <- function(environment,
             )
         )
 
-         void_centers <- void_centers[within > 0, ] %>% 
+        # Counter to the documentation of QVEmod, Voids are defined on the air grid!
+        void_centers <- void_centers[within > 0, ] %>% 
             as.data.frame() %>% 
             setNames(c("x", "y")) %>% 
             dplyr::mutate(
-                x = as.integer((x - air_dx/2) / air_dx),
-                y = as.integer((y - air_dx/2) / air_dx)
+                x = as.integer((x + env_size[1]/2) / air_dx),
+                y = as.integer((y + env_size[2]/2) / air_dx)
             )
 
     } else {
@@ -573,7 +589,6 @@ simulate <- function(environment,
     )
 
     # Execute the model with the configuration
-    # browser()
     cat("\rRunning viral model")
     py$run_model(
         viral_model,
