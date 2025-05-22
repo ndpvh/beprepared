@@ -27,6 +27,6 @@ For more information on the M4MA project, please see its dedicated section on th
 
 ## References
 
-Atamer Balkan, B., Chang, Y., Sparnaaij, M., Wouda, B., Boschma, D., et al. (2024) The multi-dimensional challenges of controlling respiratory virus transmission in indoor spaces: Insights from the linkage of a microscopic pedestrian simulation and SARS-CoV-2 transmission model. _PLOS Computational Biology 20_(3): e1011956. doi: [10.1371/journal.pcbi.1011956](https://doi.org/10.1371/journal.pcbi.1011956)
+Atamer Balkan, B., Chang, Y., Sparnaaij, M., Wouda, B., Boschma, D., Liu, Y.,... & ten Bosch, Q. (2024) The multi-dimensional challenges of controlling respiratory virus transmission in indoor spaces: Insights from the linkage of a microscopic pedestrian simulation and SARS-CoV-2 transmission model. _PLOS Computational Biology 20_(3): e1011956. doi: [10.1371/journal.pcbi.1011956](https://doi.org/10.1371/journal.pcbi.1011956)
 
 Robin, T., Antonini, G., Beirlaire, M., & Cruz, J. (2009). Specification, estimation, and validation of a pedestrian walking behavior model. _Transportation Research Part B, 43_, 36-56. doi: [10.1016/j.trb.2008.06.010](doi.org/10.1016/j.trb.2008.06.010)
