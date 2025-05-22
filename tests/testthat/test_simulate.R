@@ -27,7 +27,7 @@ testthat::test_that(
         # Not enough columns in surf_args
         cols <- c(
             "prob", 
-            "transfer_decay_rate",
+            "transfer_efficiency",
             "touch_frequency",
             "surface_decay_rate"
         )
@@ -49,7 +49,7 @@ testthat::test_that(
         # Not enough columns in item_args
         cols <- c(
             "prob", 
-            "transfer_decay_rate",
+            "transfer_efficiency",
             "surface_ratio",
             "surface_decay_rate"
         )
