@@ -1,0 +1,22 @@
+url: https://github.com/ndpvh/beprepared-viral-predped
+
+template:
+  bootstrap: 5
+  light-switch: true 
+  theme: github-light
+  theme-dark: github-dark
+
+navbar:
+  structure:
+  components:
+    articles:
+      text: How to use
+      menu:
+      - text: Background
+        href: articles/background.html
+      - text: Environments
+        href: articles/environments.html
+      - text: Simulations
+        href: articles/simulations.html
+      - text: Example
+        href: articles/example.html
