@@ -1,0 +1,567 @@
+---
+title: "Environments"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Environments}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+Before one is able to simulate viral disease spread through `beprepared`, one should first define an environment in which people are walking around. The creation of a physical environment is handled through `predped`, and we refer to its [documentation](https://github.com/ndpvh/predped/reference/index.html) for more details on this. Besides this physical environment, one can also specify different epidemiological characteristics of the environment, which are handled through `beprepared`. Here, we will gloss over the more important parts that allow one to specify an environment of interest.
+
+Before defining an environment, one should load the `predped` package: 
+
+```{r, include = FALSE}
+library(predped)
+```
+
+# Physical environment
+
+## Shapes
+
+The package has been designed in such a way that the user can enjoy some flexibility in creating their own scenarios, simulating and tailoring to specific use-cases. This includes some basic shapes, more specifically the `rectangle`, `circle`, and `polygon`, each of which can be used as an object within or as a shape of the environment. Creating such an object can be achieved through calling the object as a function: 
+
+```{r}
+# Rectangle at the origin (0, 0) with width 1 and height 2
+rect <- rectangle(
+    id = "my rectangle",
+    center = c(0, 0),
+    size = c(1, 2)
+)
+
+# Polygon with its defining points at the locations specified in the matrix (here a triangle)
+poly <- polygon(
+    id = "my polygon",
+    points = rbind(
+        c(1, 0),
+        c(0, 1),
+        c(0, -1)
+    )
+)
+
+# Circle at origin with radius 1
+circ <- circle(
+    id = "my circle",
+    center = c(0, 0),
+    radius = 1
+)
+```
+
+Each of these variables now defines an `S4 object` corresponding to the specified shape. One advantage of this is the definition of methods, which perform a different computation based on the provided class. For example, using the function `points` on a rectangle provides us with the coordinates that make up the rectangle:
+
+```{r}
+points(rect)
+```
+
+In contrast, using `points` on a circle defines points that lie on the circumference of the circle, but these points do not define the circle in its entirety:
+
+```{r}
+points(circ)[1:5, ] # Only select the first 5 coordinates
+```
+
+For more information on each of these shapes, you can call the helper function:
+```{r}
+?predped::rectangle
+```
+
+
+
+## Background 
+
+An environment is defined by an instance of the `S4 background` class, which has the following attributes: 
+
+- `shape`: One of the shapes defined above that will serve as the outline of the space;
+- `objects`: A list containing one or more of the shapes defined above that will serve as the objects that an agent can interact with in the space;
+- `entrance`: A vector of length 2 or a matrix with 2 columns denoting the location(s) of the entrances;
+- `exit`: (optional) Similar input to `entrance`, but this time denoting the location(s) of the exits.
+
+As an example of an environment, consider Niels' office: 
+
+```{r}
+# Recreate our office
+office <- background(
+    # Outline of the space
+    shape = rectangle(
+        center = c(0, 0), 
+        size = c(4.5, 5)
+    ), 
+
+    # Objects contained within the space
+    objects = list(
+        # Desks
+        rectangle(
+            center = c(-0.85, 0), 
+            size = c(2.4, 1.6)
+        ), 
+        # Cabinets
+        rectangle(
+            center = c(-1, -2.3), 
+            size = c(1.2, 0.4)
+        ), 
+        rectangle(
+            center = c(2.05, -1.9), 
+            size = c(0.4, 1.2)
+        ), 
+        # Big bookcase
+        rectangle(
+            center = c(0.35, 2.275), 
+            size = c(3, 0.45)
+        ),
+        # Plants
+        circle(
+            center = c(-1.75, 2.275), 
+            radius = 0.2
+        ),
+        circle(
+            center = c(-2, -2.3), 
+            radius = 0.15
+        )
+    ), 
+    entrance = c(2.25, 1.3)
+)                                               
+```
+
+If we want to visualize what this office looks like, we can use the `plot` function:
+
+```{r}
+#| fig.alt: >
+#|      One sees a visualization of an office, containing the entrance at the right and combining several gray rectangles and circles with a white rectangular background.
+#| fig.cap: >
+#|      _Visualization of an office._
+plot(office)
+```
+
+It is often useful to create your environment by going back and forth between adding an object and plotting the result, as placing objects in the environment may sometimes be confusing, especially when the environment contains many different shapes.
+
+That's it. This is how one can create environments that are fit for simulation in the `beprepared` package. The `predped` package allows for more personalization, however, which we will turn to next. 
+
+
+
+## Personalization  
+
+### Interactability 
+
+By default, `predped` assumes that all objects in the environment can be interacted with. However, as this assumption may not apply to all situations, we also allow users to limit the interactability of the objects in their environment. This is done in two ways.
+
+First, we allow users to make a complete object non-interactable by setting the argument `interactable` to `FALSE`. For example, suppose that I don't allow people to interact with my plants in the office, I can make them non-interactable as follows:
+
+```{r}
+# Recreate our office
+office <- background(
+    # Outline of the space
+    shape = rectangle(
+        center = c(0, 0), 
+        size = c(4.5, 5)
+    ), 
+
+    # Objects contained within the space
+    objects = list(
+        # Desks
+        rectangle(
+            center = c(-0.85, 0), 
+            size = c(2.4, 1.6)
+        ), 
+        # Cabinets
+        rectangle(
+            center = c(-1, -2.3), 
+            size = c(1.2, 0.4)
+        ), 
+        rectangle(
+            center = c(2.05, -1.9), 
+            size = c(0.4, 1.2)
+        ), 
+        # Big bookcase
+        rectangle(
+            center = c(0.35, 2.275), 
+            size = c(3, 0.45)
+        ),
+        # Plants: Now non-interactable
+        circle(
+            center = c(-1.75, 2.275), 
+            radius = 0.2,
+            interactable = FALSE
+        ),
+        circle(
+            center = c(-2, -2.3), 
+            radius = 0.15,
+            interactable = FALSE
+        )
+    ), 
+    entrance = c(2.25, 1.3)
+)                                               
+```
+
+Please note that if none of the objects in a given `background` are interactable, `predped` will tell the agents to enter the space and immediately leave it again through one of the provided exits. 
+
+Another way in which interactability can be limited is through the `forbidden_edges` argument in the constructors of the shapes. Essentially, this argument denotes regions in which the objects can not hold any goals (i.e., where the agent can not interact with it). For `rectangle`s and `polygon`s, this amounts to providing indices of the edges that cannot contain a goal. For `circle`s, this amounts to specifying angles that cannot contain a goal for circles through a matrix that contains the starting and the ending angles of the interval in which no goal can be contained. Applying these strategies to the office: 
+
+```{r}
+# Adjust the office to contain forbidden edges
+office <- background(
+    # Outline of the space
+    shape = rectangle(
+        center = c(0, 0), 
+        size = c(4.5, 5)
+    ), 
+
+    # Objects contained within the space
+    objects = list(
+        # Desks
+        rectangle(
+            center = c(-0.85, 0), 
+            size = c(2.4, 1.6),
+            forbidden = 1
+        ), 
+        # Cabinets
+        rectangle(
+            center = c(-1, -2.3), 
+            size = c(1.2, 0.4), 
+            forbidden = c(1, 3, 4)
+        ), 
+        rectangle(
+            center = c(2.05, -1.9), 
+            size = c(0.4, 1.2), 
+            forbidden = 2:4
+        ), 
+        # Big bookcase
+        rectangle(
+            center = c(0.35, 2.275), 
+            size = c(3, 0.45), 
+            forbidden = c(1, 2, 3)
+        ),
+        # Plants
+        circle(
+            center = c(-1.75, 2.275), 
+            radius = 0.2, 
+            forbidden = rbind(
+                c(0, 5 * pi / 4),
+                c(7 * pi / 4, 2 * pi)
+            )
+        ),
+        circle(
+            center = c(-2, -2.3), 
+            radius = 0.15,
+            forbidden = rbind(
+                c(0, pi / 4),
+                c(3 * pi / 4, 2 * pi)
+            )
+        )
+    ), 
+    entrance = c(2.25, 1.3)
+)
+```
+
+One can visualize exactly which edges cannot contain goals through toggling the `plot_forbidden` argument in `plot` to `TRUE`: 
+
+```{r}
+#| fig.alt: >
+#|      One sees the same office as before, but several of the circumferences of the gray rectangles and circles are red. 
+#|      The red color indicates which parts of the shapes cannot contain goals, that is cannot be interacted with.
+#| fig.cap: >
+#|      _Visualization of forbidden edges in the office setting._
+
+# Plot the background with forbidden locations
+plot(
+    office, 
+    plot_forbidden = TRUE,
+    forbidden.color = "red"
+)
+```
+
+Note that interactability will also be limited by where the objects are placed in the environment. More concretely, agents will note be able to interact with spaces that they cannot reach, such as with sides of an object that stand against another object or a wall. You do not need to specify this necessarily, but it may help during the setup of your simulation study.
+
+
+
+### One-directional flow 
+
+Up to now, we have assumed pedestrian flow to be bidirectional, that is that pedestrians are able to walk in two directions across the whole environment. There are, however, cases where pedestrian flow is limited so that pedestrians can walk in one but not the other direction. Think, for example, about museum exhibitions, gates at the metro station, or one-directional aisles during the COVID-19 pandemic. Given the ubiquity of unidirectional flow, we included limitations on pedestrian flow in the `predped` package.
+
+Limitations to the directionality of pedestrian flow are managed through another `S4 object`, namely the `segment`, which should be contained in a list and provided to the `limited_access` argument of the `background` class. A `segment` is defined by its start and end point, namely:
+
+```{r}
+# Create a segment that starts at the origin and goes to coordinate (1, 1)
+my_segment <- segment(
+    from = c(0, 0), 
+    to = c(1, 1)
+)
+```
+
+Providing `segment`s to the `limited_access` slot will limit the possibility of pedestrians to cross the segment itself in such a way that if a pedestrian is located at one side of the segment, they are able to cross it, but not when standing at the other side of this segment. A visual representation of this functionality is shown in the following figure. 
+
+```{r}
+#| fig.alt: >
+#|      One sees two figures displaying an agent at the left and one at the right side of a segment. 
+#|      In the left visual, the line starts at the bottom and ends at the top, preventing the agent to the left from crossing the segment (while the agent on the right is free to pass).
+#|      In the right visual, the line starts at the top and ends at the bottom, preventing the agent to the right from crossing the segment (while the agent on the left is free to pass).
+#| fig.cap: >
+#|      _Visualization of unidirectional flow as controlled by segments._
+knitr::include_graphics(
+    file.path(
+        "..",
+        "vignettes",
+        "unidirectional.png"
+    )
+)
+```
+
+
+In this figure, we define a segment going from a given coordinate F to another coordinate T (`from` and `to` resp.). Pedestrians cannot cross the `segment` whenever they find themselves on the left side of it. 
+
+Let's put this to practice. First, we define a simplified version of a train station where people can enter the space either through one of the entrances or through the train tracks. Such a simplified train station may look as follows:
+
+```{r}
+#| fig.alt: >
+#|      One sees a simplified train station that contains entrances in the middle on each side. 
+#|      At the left and right entrances, there are also "bottlenecks" present that require agents to pass through one by one.
+#| fig.cap: >
+#|      _Visualization of a simplified train station with entrance gates._
+
+train_station <- background(
+    # Define a space of size (10, 5) meters
+    shape = rectangle(
+        center = c(0, 0), 
+        size = c(10, 5)
+    ), 
+    
+    # Define some gates at the entrances. These gates are 
+    # not interactable.
+    objects = list(
+        # Gates on the left
+        rectangle(
+            center = c(-3, 0), 
+            size = c(0.6, 1.3),
+            interactable = FALSE
+        ), 
+        rectangle(
+            center = c(-3, 1.9), 
+            size = c(0.6, 1.2),
+            interactable = FALSE
+        ),
+        rectangle(
+            center = c(-3, -1.9), 
+            size = c(0.6, 1.2),
+            interactable = FALSE
+        ),
+
+        # Gates on the right
+        rectangle(
+            center = c(3, 0), 
+            size = c(0.6, 1.3),
+            interactable = FALSE
+        ), 
+        rectangle(
+            center = c(3, 1.9), 
+            size = c(0.6, 1.2),
+            interactable = FALSE
+        ),
+        rectangle(
+            center = c(3, -1.9), 
+            size = c(0.6, 1.2),
+            interactable = FALSE
+        )
+    ),
+
+    # Define the entrances themselves. The two entrances
+    # at the top and bottom of the space represent the 
+    # stairs agents can use to exit the train tracks. 
+    # The two entrances at the left and right represent
+    # the entrances of the train station.
+    entrance = rbind(
+        # Top and bottom
+        c(0, 2.5), 
+        c(0, -2.5),
+
+        # Left and right
+        c(-5, 0),
+        c(5, 0)
+    )
+)
+
+plot(train_station)
+```
+
+Now, we want to impose unidirectionality so that agent who enter the space and need to pass through the gates always have to take the gates to their right. To achieve this goal, we add segments at each of the gates in the following way:
+
+```{r}
+#| fig.alt: >
+#|      One sees the same train station as before, but now the bottlenecks at the left and right side also contain arrows that indicate in which direction a pedestrian can pass through.
+#| fig.cap: >
+#|      _Visualization of a simplified train station with entrance gates that can only be passed through at one side._
+
+# Add segments that deal with directionality to the previously defined train station
+limited_access(train_station) <- list(
+    # Gates on the left
+    segment(from = c(-3.3, -0.6), to = c(-3.3, -1.3)),
+    segment(from = c(-2.7, 0.6), to = c(-2.7, 1.3)),
+    
+    # Gates on the right
+    segment(from = c(2.7, -0.6), to = c(2.7, -1.3)),
+    segment(from = c(3.3, 0.6), to = c(3.3, 1.3))
+)
+
+# Plot the train station. 
+# The argument `segment.hjust` makes sure arrows are plotted entirely to the left  of the segment:
+# The arrow's head lies directly on center of the segment itself.
+plot(
+    train_station, 
+    segment.hjust = 0
+)
+```
+
+The arrows in this figure show in which direction the pedestrian is allowed to pass the segment. We want to make the reader aware of our choice to put the segments at the end of each gate rather than in the middle. Experience teaches us that if we do not specify the segments in this way, agents have the tendency to move into closed gates before realizing they are not accessible. 
+
+
+
+# Epidemiological characteristics
+
+While `predped` provides the physical environment and defines how a pedestrian should navigate in it, `QVEmod` also requires the specification of some epidemiological characteristics related to the environment. We distinguish between characteristics related to the general environment, objects, and items.
+
+## Environment 
+
+The epidemiological characteristics of the environment pertain to how long a pathogen can survive within the environment. Specifically, one specifies the following arguments:
+
+- `decay_rate_air`, `decay_rate_droplet`, `decay_rate_surface`: How much a virus load decays within the three sources of infection (air, droplets, and tactile contact/surfaces);
+- `air_exchange_rate`: How much the air is refreshed within the environment; 
+- `droplet_to_surface_rate`: How much of the droplets fall down on and infect surfaces in the environment.
+
+The values of these arguments should be contained in a `data.frame` before being provided to the `simulate` function (see [Simulations](https://github.com/ndpvh/beprepared-viral-predped/articles/simulations.html)). Combining these arguments in a `data.frame` may look like follows: 
+
+```{r}
+epidemiology_env <- data.frame(
+    decay_rate_air = 1.51, 
+    decay_rate_droplet = 0.3,
+    decay_rate_surface = 0.262, 
+    air_exchange_rate = 0.2, 
+    droplet_to_surface_transfer_rate = 18.18
+)
+```
+
+Note that each of these characteristics needs only a single value, which stands in stark contrast to the epidemiological characteristics related to objects, items, and pedestrians.
+
+
+
+## Objects 
+
+With regard to objects, `QVEmod` distinguishes between objects in space (e.g., furniture) and items that can be picked up or interacted with (e.g., a book). We honor this distinction here.
+
+### Objects in space
+
+In the `QVEmod` package, an important distinction is made between objects that are impermeable (e.g., closets) and objects that have surfaces that may be contaminated (e.g., tables). While such a distinction is not native in `predped`, users can make this distinction by providing surfaces with an `id` that contains the string `"surface"`. In the example of the office, for example:
+
+```{r}
+# Differentiating surfaces from impermeable objects
+office <- background(
+    # Outline of the space
+    shape = rectangle(
+        center = c(0, 0), 
+        size = c(4.5, 5)
+    ), 
+
+    # Objects contained within the space
+    objects = list(
+        # Desks
+        rectangle(
+            id = "surface: desks",
+            center = c(-0.85, 0), 
+            size = c(2.4, 1.6)
+        ), 
+        # Cabinets
+        rectangle(
+            center = c(-1, -2.3), 
+            size = c(1.2, 0.4)
+        ), 
+        rectangle(
+            center = c(2.05, -1.9), 
+            size = c(0.4, 1.2)
+        ), 
+        # Big bookcase
+        rectangle(
+            center = c(0.35, 2.275), 
+            size = c(3, 0.45)
+        ),
+        # Plants
+        circle(
+            id = "surface: plants",
+            center = c(-1.75, 2.275), 
+            radius = 0.2
+        ),
+        circle(
+            id = "surface: plants",
+            center = c(-2, -2.3), 
+            radius = 0.15
+        )
+    ), 
+    entrance = c(2.25, 1.3)
+)                                               
+```
+
+Note that `predped` expects the `id`s of the objects in the room to be unique: You can expect errors when calling each surface by the same name.
+
+In `beprepared`, only the surfaces have callable/changeable epidemiological characteristics, which pertain to how long a pathogen can survive on a surface. Specifically, one specifies the following arguments:
+
+- `transfer_efficiency`: How successfully a given viral load is transferred to someone touching the surface;
+- `touch_frequency`: How often a surface is touched; 
+- `surface_decay_rate`: How much the virus load decays on the surface.
+
+The values of these arguments should be contained in a `data.frame` before being provided to the `simulate` function (see [Simulations](https://github.com/ndpvh/beprepared-viral-predped/articles/simulations.html)). Combining these arguments in a `data.frame` may look like follows: 
+
+```{r}
+epidemiology_surf <- data.frame(
+    prob = 1, 
+    transfer_efficiency = 0.5, 
+    touch_frequency = 15,
+    surface_decay_rate = 0.969
+)
+```
+
+Note that there is an additional argument `prob`. This represents the probability with which a given (random) surface in the environment will be given the parameters in its row. This means that each surface in the environment can contain a different set of parameters, randomly selected from the list of potential parameters with a probability `prob`. For example: 
+
+```{r}
+epidemiology_surf <- data.frame(
+    prob = c(0.75, 0.25), 
+    transfer_efficiency = c(0.25, 0.75), 
+    touch_frequency = c(15, 30),
+    surface_decay_rate = c(0.969, 0.969)
+)
+```
+defines a 75% probability of having a surface in the environment that has low risk of infection (`transfer_efficiency` and `touch_frequency` are low) while there exists a 25% probability of having a surface with a high risk of infection (`transfer_efficiency` and `touch_frequency` are high). Currently, there is no way to control which surfaces in the environment are provided with which parameters.
+
+
+
+### Items
+
+In `beprepared`, items only exist at the location of the `goals` that `predped` defines (and which pedestrians in the model try to complete), picking up these items once completing their goal. Through `QVEmod`, these items have their own set of callable/changeable epidemiological characteristics, which pertain to how long a pathogen can survive on that item. Specifically, one specifies the following arguments:
+
+- `transfer_efficiency`: How successfully a given viral load is transferred to someone touching the item;
+- `surface_ratio`: The ratio of the width to the height of the item; 
+- `surface_decay_rate`: How much the virus load decays on the item.
+
+The values of these arguments should be contained in a `data.frame` before being provided to the `simulate` function (see [Simulations](https://github.com/ndpvh/beprepared-viral-predped/articles/simulations.html)). Combining these arguments in a `data.frame` may look like follows: 
+
+```{r}
+# Only square items
+epidemiology_item <- data.frame(
+    prob = 1, 
+    transfer_efficiency = 0.5, 
+    surface_ratio = 1, 
+    surface_decay_rate = 0.969
+)
+```
+
+Similar to surfaces, one can create multiple parameter sets for the items: 
+
+```{r}
+# 75% chance of square item, 25% chance of rectangular item
+epidemiology_item <- data.frame(
+    prob = c(0.75, 0.25), 
+    transfer_efficiency = c(0.25, 0.75), 
+    surface_ratio = c(1, 2),
+    surface_decay_rate = c(0.969, 0.969)
+)
+```
+
+
+
+## Note on values 
+
+The defaults of the epidemiological characteristics are based on available documentation and examples of `QVEmod`. Before changing the values of these characteristics, please read the available documentation of this package ([`pedvis`](https://git.wur.nl/sso-public/pedvis) and [`pedvis-simulator`](https://git.wur.nl/sso-public/pedvis-simulator)).

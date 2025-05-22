@@ -1,0 +1,220 @@
+---
+title: "Agents"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Agents}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, include = FALSE}
+library(beprepared)
+```
+
+An important part of the `predped` and `QVEmod` packages -- and consequently, for the `beprepared` package -- are the definition of agents, in our case people, that walk around and perform a given set of actions. Both packages allow for a wide variety of different agent characteristics defining walking behavior (`predped`) or viral disease spread (`QVEmod`).
+
+
+
+# Walking behavior
+
+In `predped`, an agent's walking behavior is governed by a set of parameters that together define the _utility_ of moving to a given location. To view the default parameter sets, one can call:
+
+```{r}
+head(predped::params_from_csv[["params_archetypes"]])
+```
+
+This `data.frame` contains the internal name of a given parameter set (e.g., `"BaselineEuropean"`) together with a long list of parameters related to that _archetype_. To mention a few interesting ones (and referring to the [`predped` documentation](https://github.com/ndpvh/predped/reference/index.html) for the rest):
+
+- `radius`: The size of the agent (radius of a circle);
+- `preferred_speed`: The preferred speed at which the agent walks;
+- `randomness`: The extent to which the agent moves in a determinstic or random way; 
+- `b_current_direction`: Weight of the utility of continuing in the same direction; 
+- `b_goal_direction`: Weight of the utility of walking in the direction of your current goal;
+- `b_blocked`: Weight of the utility for avoiding directions that may lead to blockage; 
+- `b_interpersonal`: Weight of the utility for keeping an interpersonal distance from others; 
+- `b_preferred_speed`: Weight of the utility for walking at your `preferred_speed`.
+
+In `beprepared`, one can specify an agent's parameter set by providing a given character vector to the `archetypes` argument in `simulate`, for example:
+
+```{r, eval = FALSE}
+simulate(
+    office, 
+    archetypes = "BaselineEuropean",
+    ... # Other arguments
+)
+```
+
+will run a simulation with agents that all have the parameters of the `"BaselineEuropean"`s. One can also use a mix of different archetypes by providing a character vector rather than a single character, for example:
+
+```{r, eval = FALSE}
+simulate(
+    office, 
+    archetypes = c(
+        "BaselineEuropean",
+        "BigRushingDutch"
+    ),
+    ... # Other arguments
+)
+```
+
+Importantly, as such, each agent is randomly drawn from the two potential archetypes with the same probability, meaning each agent has a 50% change of becoming a `"BaselineEuropean"` or a `"BigRushingDutch"`. One can control these probabilities through the `weights` argument. For example, specifying:
+
+```{r, eval = FALSE}
+simulate(
+    office, 
+    archetypes = c(
+        "BaselineEuropean",
+        "BigRushingDutch"
+    ),
+    weights = c(
+        0.25,
+        0.75
+    ),
+    ... # Other arguments
+)
+```
+
+tells `predped` that each agent should have a 25% chance of becoming a `"BaselineEuropean"` and a 75% chance of becoming a `"BigRushingDutch"`.
+
+
+
+## Individual differences 
+
+Using different archetypes in a simulation is one way to accommodate differences in people's walking behavior. However, it may be unrealistic to assume that people only differ from each other qualitatively (i.e., have qualitatively different sets of parameters), and rather wish to (also) include more subtle quantiative differences (i.e., small differences in parameter values). This can be achieved by putting the `individual_differences` argument of `simulate` to `TRUE`:
+
+```{r, eval = FALSE}
+simulate(
+    office, 
+    archetypes = "BaselineEuropean",
+    individual_differences = TRUE,
+    ... # Other arguments
+)
+```
+
+When `individual_differences` is `TRUE`, each agent will have its own unique set of parameters which is based on a given archetype (in this case, the `"BaselineEuropean"`). Qualitatively, the agents that have parameters based on a same archetype will exhibit behavior that is quite similar to one another, but yet they will differ ever so slightly on some specifics. 
+
+
+
+## Using your own parameters 
+
+It is possible to create your own archetype and use it in your simulations. This can be achieved through:
+
+1. Loading `params_from_csv`;
+2. Changing its values; 
+3. Saving your parameters to a file (preferably through `saveRDS`);
+4. Providing the `simulate` function with the filename through the `archetypes_filename` argument. 
+
+Putting this to practice, a script to load in the default parameters of `predped` and change their values may look like this: 
+
+```{r}
+# Read in default parameters
+params <- predped::load_parameters()
+
+# Only retain the BaselineEuropean in the parameters and change their preferred speed to 0.5 m/s (as well as their name)
+means <- params[["params_archetypes"]]
+params[["params_archetypes"]] <- means |>
+    dplyr::filter(name == "BaselineEuropean") |>
+    dplyr::mutate(
+        name = "SlowEuropean",
+        preferred_speed = 0.5
+    )
+
+# Change params_sigma to have values for the SlowEuropean. 
+# This is important when one wants `individual_differences = TRUE`
+covariances <- params[["params_sigma"]]
+params[["params_sigma"]][["SlowEuropean"]] <- covariances["BaselineEuropean"]
+```
+ 
+Having changed the variable `params`, we now have to save this variable to a file:
+
+```{r, eval = FALSE}
+# Save this list of parameters in a local file
+saveRDS(
+    params, 
+    file.path("my_parameters.Rds")
+)
+```
+
+Once saved, one can use this parameter set in the simulation by specifying both `archetypes` and `archetypes_filename`:
+
+```{r, eval = FALSE}
+simulate(
+    office, 
+    archetypes = "SlowEuropean",
+    archetypes_filename = "my_parameters.Rds",
+    individual_differences = TRUE,
+    ... # Other arguments
+)
+```
+
+
+
+# Viral disease spread 
+
+Agents may also differ with regard to health behavior. These parameters are defined in the same way as the epidemiological characteristics of surfaces and items. Specifically, `QVEmod` allows for the specification of the following parameters: 
+
+- `viral_load`: Current viral load of the agent (between 0 and 1);  
+- `contamination_load_air`, `contamination_load_droplet`, `contamination_load_surface`: Amount of viruses the agent has already come in contact with through air, droplets, or touching surfaces;
+- `emission_rate_air`, `emission_rate_droplet`: Rate at which an infected agent emits viruses into the air or into droplets; 
+- `pick_up_air`, `pick_up_droplet`: Coefficient of exposure to contamination coming from air or droplets; 
+- `wearing_mask`: Whether the agent wears a mask (0 or 1).
+
+These characteristics are bundled in a `data.frame`, for example:
+
+```{r}
+agent_characteristics <- data.frame(
+    prob = 1,
+    viral_load = 1, 
+    contamination_load_air = 0, 
+    contamination_load_droplet = 0, 
+    contamination_load_surface = 1,
+    emission_rate_air = 0.53, 
+    emission_rate_droplet = 0.47, 
+    pick_up_air = 2.3, 
+    pick_up_droplet = 2.3,
+    wearing_mask = 1
+)
+```
+
+Again notice the `prob` column, which implies that (like for surfaces and items), one can specify more than one type of agent:
+
+```{r}
+agent_characteristics <- data.frame(
+    prob = rep(1/3, 3),
+    viral_load = c(1, 0, 0), 
+    contamination_load_air = c(0, 0, 0), 
+    contamination_load_droplet = c(0, 0, 0), 
+    contamination_load_surface = c(1, 0, 0),
+    emission_rate_air = rep(0.53, 3), 
+    emission_rate_droplet = rep(0.47, 3), 
+    pick_up_air = c(2.3, 30, 30), 
+    pick_up_droplet = c(2.3, 30, 30),
+    wearing_mask = c(0, 1, 0)
+)
+```
+
+Currently, there is no way of coupling a given archetype to a given set of health behaviors: Both are randomly assigned to each agent in the simulation.
+
+Besides these agent-specific characteristics, `QVEmod` also allows for more general population characterics. Specifically:
+
+`HandwashingContaminationFraction`: How much washing one's hands helps in reducing contamination;
+`HandwashingEffectDuration`: How long the effect of washing one's hands lasts;
+`MaskEmissionAerosolReductionEfficiency`, `MaskEmissionDropletReductionEfficiency`, `MaskAerosolProtectionEfficiency`, `MaskDropletProtectionEfficiency`: How much wearing a mouth mask helps in reducing contamination;
+`CoughingRate`, `CoughingFactor`, `CoughingAerosolPercentage`, `CoughingDropletPercentage`: Determinants of coughing of an agent.
+
+Again specifying these in a `data.frame` gives us:
+
+```{r}
+configuration <- data.frame(
+    HandwashingContaminationFraction = 0.3,
+    HandwashingEffectDuration = 0.5,
+    MaskEmissionAerosolReductionEfficiency = 0.4,
+    MaskEmissionDropletReductionEfficiency = 0.04,
+    MaskAerosolProtectionEfficiency = 0.4,
+    MaskDropletProtectionEfficiency = 0.04,
+    CoughingRate = 121,
+    CoughingFactor = 1,
+    CoughingAerosolPercentage = 1.0,
+    CoughingDropletPercentage = 1.0
+)
+```
