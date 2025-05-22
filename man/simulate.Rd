@@ -8,6 +8,8 @@ simulate(
   environment,
   archetypes = "BaselineEuropean",
   weights = rep(1/length(archetypes), length(archetypes)),
+  archetypes_filename = NULL,
+  sep = ",",
   dx = 0.01,
   path = file.path("results"),
   filename = NULL,
@@ -16,9 +18,9 @@ simulate(
   env_args = data.frame(decay_rate_air = 1.51, decay_rate_droplet = 0.3,
     decay_rate_surface = 0.262, air_exchange_rate = 0.2, droplet_to_surface_transfer_rate
     = 18.18),
-  surf_args = data.frame(prob = 1, transfer_decay_rate = 0.5, touch_frequency = 15,
+  surf_args = data.frame(prob = 1, transfer_efficiency = 0.5, touch_frequency = 15,
     surface_decay_rate = 0.969),
-  item_args = data.frame(prob = 1, transfer_decay_rate = 0.7, surface_ratio = 0.5,
+  item_args = data.frame(prob = 1, transfer_efficiency = 0.7, surface_ratio = 0.5,
     surface_decay_rate = 0.274),
   agent_args = data.frame(prob = rep(1/3, 3), viral_load = c(1, 0, 0),
     contamination_load_air = c(0, 0, 0), contamination_load_droplet = c(0, 0, 0),
@@ -52,6 +54,13 @@ denoting the environment in which agents are to walk around.}
 \item{weights}{Numeric vector denoting the probability with which each 
 parameter set can be chosen to enter the simulation. Defaults to equal 
 weighing of each entry in \code{archetypes}.}
+
+\item{archetypes_filename}{Character denoting the path of where to find the 
+values for the \code{predped} parameters. Defaults to \code{NULL}, using 
+\code{predped}s defaults.}
+
+\item{sep}{Character denoting the separator value used in the file specified
+in \code{archetypes_filename}. Defaults to \code{","}.}
 
 \item{dx}{Numeric denoting the width and height of each cell in the simulation.
 While \code{predped} operates on continuous space, \code{QVEmod} requires 
@@ -216,8 +225,8 @@ The \code{surf_args} take in the following specifications (numeric vectors):
     \item{\code{prob}:}
          {probability of assigning a given set of surface parameters to a 
           particular surface in the environment}
-    \item{\code{transfer_decay_rate}:}
-         {how much contamination on the surface decays on touch}
+    \item{\code{transfer_efficiency}:}
+         {how efficiently contamination is spread on touch}
     \item{\code{touch_frequency}:}
          {how often agents touch the surface}
     \item{\code{surface_decay_rate}:}
@@ -229,8 +238,8 @@ The \code{item_args} take in the following specifications (numeric vectors):
     \item{\code{prob}:}
          {probability of assigning a given set of item parameters to a 
           particular goal that the agent has accomplished}
-    \item{\code{transfer_decay_rate}:}
-         {how much contamination on the item decays on touch}
+    \item{\code{transfer_efficiency}:}
+         {how efficiently contamination on the item is spread on touch}
     \item{\code{surface_ratio}:}
          {ratio of the height vs the width of the item}
     \item{\code{surface_decay_rate}:}
