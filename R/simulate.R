@@ -101,8 +101,8 @@
 #'     \item{\code{prob}:}
 #'          {probability of assigning a given set of surface parameters to a 
 #'           particular surface in the environment}
-#'     \item{\code{transfer_decay_rate}:}
-#'          {how much contamination on the surface decays on touch}
+#'     \item{\code{transfer_efficiency}:}
+#'          {how efficiently contamination is spread on touch}
 #'     \item{\code{touch_frequency}:}
 #'          {how often agents touch the surface}
 #'     \item{\code{surface_decay_rate}:}
@@ -114,8 +114,8 @@
 #'     \item{\code{prob}:}
 #'          {probability of assigning a given set of item parameters to a 
 #'           particular goal that the agent has accomplished}
-#'     \item{\code{transfer_decay_rate}:}
-#'          {how much contamination on the item decays on touch}
+#'     \item{\code{transfer_efficiency}:}
+#'          {how efficiently contamination on the item is spread on touch}
 #'     \item{\code{surface_ratio}:}
 #'          {ratio of the height vs the width of the item}
 #'     \item{\code{surface_decay_rate}:}
@@ -193,6 +193,8 @@
 simulate <- function(environment, 
                      archetypes = "BaselineEuropean", 
                      weights = rep(1 / length(archetypes), length(archetypes)), 
+                     archetypes_filename = NULL,
+                     sep = ",",
                      dx = 0.01,
                      path = file.path("results"),
                      filename = NULL, 
@@ -207,13 +209,13 @@ simulate <- function(environment,
                      ),
                      surf_args = data.frame(
                         prob = 1, 
-                        transfer_decay_rate = 0.5,
+                        transfer_efficiency = 0.5,
                         touch_frequency = 15,
                         surface_decay_rate = 0.969
                      ),
                      item_args = data.frame(
                         prob = 1,
-                        transfer_decay_rate = 0.7, 
+                        transfer_efficiency = 0.7, 
                         surface_ratio = 0.5,
                         surface_decay_rate = 0.274
                      ),
@@ -299,7 +301,7 @@ simulate <- function(environment,
     # Check the arguments for the QVEmod Fixture class
     cols <- c(
         "prob", 
-        "transfer_decay_rate",
+        "transfer_efficiency",
         "touch_frequency",
         "surface_decay_rate"
     )
@@ -308,7 +310,7 @@ simulate <- function(environment,
     # Check the arguments for the QVEmod Item class
     cols <- c(
         "prob", 
-        "transfer_decay_rate",
+        "transfer_efficiency",
         "surface_ratio",
         "surface_decay_rate"
     )
@@ -334,7 +336,9 @@ simulate <- function(environment,
     model <- predped::predped(
         setting = environment, 
         archetypes = archetypes, 
-        weights = weights
+        weights = weights,
+        filename = archetypes_filename,
+        sep = sep
     )
 
     # Actually do the simulation and transform the data to a time-series format.
