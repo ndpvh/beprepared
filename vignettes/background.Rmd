@@ -1,0 +1,32 @@
+---
+title: "Background"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Background}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+This package was introduced to fill the need of understanding how behavioral and epidemiological interventions may work together to mitigate viral disease spread. It builds on the idea that we can intervene on both the behavioral level (e.g., through social distancing) and on the epidemiological level (e.g., through wearing mouth masks), and that the success of both types of interventions depends in part on the environments one is currently in. To achieve this, the `beprepared` package combines two computational models, one governing walking behavior and the other governing viral disease spread. Both models will be briefly discussed.
+
+To govern walking behavior, `beprepared` builds on the Minds for Mobile Agents pedestrian model (M4MA) and its associated package [`predped`](https://github.com/ndpvh/predped). This model is based on the pedestrian model developed by Robin et al. (2009) and, similarly, proposes that pedestrian movement is determined on two levels, namely (a) a tactical level -- which is concerned with determining ones goals in a room and how to get to those -- and (b) an operational level -- which is concerned with step-by-step decisions. Critically, M4MA builds on psychological mechanisms to determine an _agent_'s walking behavior, specifically providing them with predictive capacities as well as preferences in how they walk around.
+
+To govern viral disease spread, `beprepared` builds on the Quantifying Viruses in Environments viral disease spread model (QVEmod) and its associated package `QVEmod`. This model proposes three main sources for viral disease spread, namely spread through the air, through droplets, and through tactile contact with infected surfaces. For a specific person in an enclosed space, this model determines the infection risk through each of the three sources, taking into account a bunch of epidemiological factors that contribute to decay and exposure (e.g., how well-ventilated a room is or whether people are wearing mouth masks). Importantly, this model has been used successfully in the past (Atamer Balkan et al., 2024), albeit combine with another pedestrian model (see the associated [`pedvis`](https://git.wur.nl/sso-public/pedvis) and [`pedvis-simulator`](https://git.wur.nl/sso-public/pedvis-simulator) repositories).
+
+## Frozen
+
+This version of `beprepared` is frozen in time and will not be developed anymore. To request a feature, we therefore ask to create an informative _Issue_ on the sister repository [`viral-predped`](https://github.com/ndpvh/viral-predped).
+
+## License
+
+This project is distributed under a GNU GPL-3 license. For details, please see the [License](https://github.com/ndpvh/beprepared-viral-predped/-/blob/main/LICENSE). Please note that the same licenses apply to the two packages that underlie `beprepared`.
+
+## See also
+
+For more information on the M4MA project, please see its dedicated section on the lab website: [https://www.ampl-psych.com/projects/minds-for-mobile-agents/](https://www.ampl-psych.com/projects/minds-for-mobile-agents/). This work is part of the BePrepared consortium. More information on this consortium can be found on the following website: [https://be-prepared-consortium.nl/](https://be-prepared-consortium.nl/)
+
+## References
+
+Atamer Balkan, B., Chang, Y., Sparnaaij, M., Wouda, B., Boschma, D., et al. (2024) The multi-dimensional challenges of controlling respiratory virus transmission in indoor spaces: Insights from the linkage of a microscopic pedestrian simulation and SARS-CoV-2 transmission model. _PLOS Computational Biology 20_(3): e1011956. doi: [10.1371/journal.pcbi.1011956](https://doi.org/10.1371/journal.pcbi.1011956)
+
+Robin, T., Antonini, G., Beirlaire, M., & Cruz, J. (2009). Specification, estimation, and validation of a pedestrian walking behavior model. _Transportation Research Part B, 43_, 36-56. doi: [10.1016/j.trb.2008.06.010](doi.org/10.1016/j.trb.2008.06.010)
