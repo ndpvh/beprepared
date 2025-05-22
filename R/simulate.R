@@ -133,6 +133,11 @@
 #' @param weights Numeric vector denoting the probability with which each 
 #' parameter set can be chosen to enter the simulation. Defaults to equal 
 #' weighing of each entry in \code{archetypes}.
+#' @param archetypes_filename Character denoting the path of where to find the 
+#' values for the \code{predped} parameters. Defaults to \code{NULL}, using 
+#' \code{predped}s defaults.
+#' @param sep Character denoting the separator value used in the file specified
+#' in \code{archetypes_filename}. Defaults to \code{","}.
 #' @param dx Numeric denoting the width and height of each cell in the simulation.
 #' While \code{predped} operates on continuous space, \code{QVEmod} requires 
 #' this space to consist of discretized cells. This argument is therefore 
