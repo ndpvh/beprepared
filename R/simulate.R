@@ -227,8 +227,8 @@ simulate <- function(environment,
                      agent_args = data.frame(
                         prob = rep(1/3, 3),
                         viral_load = c(1, 0, 0), 
-                        contamination_load_air = c(0, 0, 0), 
-                        contamination_load_droplet = c(0, 0, 0), 
+                        contamination_load_air = c(1, 0, 0), 
+                        contamination_load_droplet = c(1, 0, 0), 
                         contamination_load_surface = c(1, 0, 0),
                         emission_rate_air = rep(0.53, 3), 
                         emission_rate_droplet = rep(0.47, 3), 
@@ -643,7 +643,7 @@ simulate <- function(environment,
     }
 
     # If you want to save the gif of this simulation, do so
-    if(save_gif) {
+    if(save_gif) {        
         # Movement level: Shows the agents walking around without any other 
         # nuisances.
         cat("\rVisualizing results: |        |")
@@ -652,40 +652,64 @@ simulate <- function(environment,
         # of arguments to pass along the plot function, we need to add the trace
         # to this list and use do.call to actually perform the plotting.
         movement <- do.call(
-            plot,
+            predped::plot,
             list(trace, "print_progress" = FALSE) %>% 
                 append(plot_args)
         )
 
         # Find out which agents are contagious and adjust the plots so that 
         # they are clearly shown in the gif.
+        agent_args <- results[["agents"]]
         ill_agents <- agent_args$id[agent_args$viral_load == 1]
         env_size <- environment %>% 
-            shape() %>% 
-            size() %>% 
-            max()
+            predped::shape() %>% 
+            predped::size() 
+        if(length(env_size) == 1) {
+            env_size <- rep(env_size, 2) * 2
+        }
 
-        for(i in seq_along(trace)) {
-            # Retrieve all agents who were currently running around in the 
-            # simulation
-            agent_list <- agents(trace[[i]])
+        env_center <- environment %>% 
+            predped::shape() %>% 
+            predped::center() 
 
-            # Loop over all these agents, check whether the agents are ill, and
-            # if so, add an X over this agent.
-            for(j in agent_list) {                
-                if(id(j) %in% ill_agents) {
-                    movement[[i]] <- movement[[i]] +
-                        ggplot2::annotate(
-                            "text", 
-                            label = "X",
-                            x = position(j)[1],
-                            y = position(j)[2],
-                            color = color(j),
-                            hjust = 0.5,
-                            size = 500 * radius(j) / env_size
-                        )
+        # Check if there are any agents that are ill
+        if(length(ill_agents) > 0) {
+            # Get the color of the infection
+            infected <- ifelse(
+                is.null(plot_args$heatmap.fill), 
+                "salmon",
+                plot_args$heatmap.fill[2]
+            )
+
+            # Loop over all plots and add which agents are infected and which 
+            # ones aren't
+            movement <- lapply(
+                seq_along(movement),
+                function(i) {
+                    # Retrieve all agents who were currently running around in the 
+                    # simulation
+                    agent_list <- predped::agents(trace[[i]])
+
+                    # Loop over all these agents, check whether the agents are ill, and
+                    # if so, add an X over this agent.
+                    for(j in agent_list) {       
+                        if(predped::id(j) %in% ill_agents) {                            
+                            infected_agent <- do.call(
+                                predped::plot, 
+                                list(
+                                    j,
+                                    agent.fill = infected
+                                ) %>%
+                                    append(plot_args)
+                            )
+                            movement[[i]] <- movement[[i]] +
+                                infected_agent
+                        }
+                    }
+
+                    return(movement[[i]])
                 }
-            }
+            )
         }
 
 
@@ -694,17 +718,14 @@ simulate <- function(environment,
         cat("\rVisualizing results: |==      |")
 
         # Read in the data
-        data <- data.table::fread(
-            file.path(output_config$Path, "aerosol_contamination.csv"),
-            data.table = FALSE
-        )
+        data <- results[["aerosol"]]
 
         # Rescale X and Y to the continuous positions of the centers of their 
         # bins.
         data <- data %>% 
             dplyr::mutate(
-                X = X * air_dx + air_dx/2, 
-                Y = Y * air_dx + air_dx/2
+                X = X * air_dx + env_center[1] - env_size[1]/2, 
+                Y = Y * air_dx + env_center[2] - env_size[2]/2
             ) %>% 
             dplyr::rename(Z = Contamination) 
 
@@ -741,17 +762,14 @@ simulate <- function(environment,
         cat("\rVisualizing results: |====    |")
 
         # Read in the data
-        data <- data.table::fread(
-            file.path(output_config$Path, "droplet_contamination.csv"),
-            data.table = FALSE
-        )
+        data <- results[["droplet"]]
 
         # Rescale X and Y to the continuous positions of the centers of their 
         # bins.
         data <- data %>% 
             dplyr::mutate(
-                X = X * air_dx + air_dx/2, 
-                Y = Y * air_dx + air_dx/2
+                X = X * air_dx + env_center[1] - env_size[1]/2, 
+                Y = Y * air_dx + env_center[2] - env_size[2]/2
             ) %>% 
             dplyr::rename(Z = Contamination)
 
