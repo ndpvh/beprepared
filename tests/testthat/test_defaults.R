@@ -73,3 +73,27 @@ testthat::test_that(
         testthat::expect_equal(tst, data.frame(prob = rep(0.5, 2), x = rep(1, 2), y = rep(2, 2)))
     }
 )
+
+testthat::test_that(
+    "Defaults: Test multiple defaults",
+    {
+        def <- data.frame(
+            x = 1:3, 
+            y = 3:5
+        )
+
+        # Single row input
+        tst <- defaults(data.frame(x = 1), def)
+        testthat::expect_equal(tst, data.frame(x = rep(1, 3), y = 3:5))
+
+        # Multiple row input
+        tst <- defaults(data.frame(x = 1:2), def)
+        testthat::expect_equal(
+            tst, 
+            data.frame(
+                x = rep(1:2, times = 3), 
+                y = rep(3:5, times = 2)
+            )
+        )
+    }
+)
