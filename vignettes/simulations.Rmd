@@ -1,0 +1,279 @@
+---
+title: "Simulations"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Simulations}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE, include = FALSE}
+library(predped)
+library(beprepared)
+set.seed(1)
+```
+
+In _Environments_ and _Agents_, we learned how to set up an environment and define the agents that walk around in it (potentially spreading or pickup up on viruses). In this vignette, we will combine this information to run a simulation. For this, we base ourselves on the one-directional train station, defined as:
+
+```{r}
+#| fig.alt: >
+#|      One sees a simplified train station that contains entrances in the middle on each side. 
+#|      At the left and right entrances, there are also "bottlenecks" present that require agents to pass through one by one.
+#| fig.cap: >
+#|      _Visualization of a simplified train station with entrance gates._
+
+train_station <- background(
+    # Define a space of size (10, 5) meters
+    shape = rectangle(
+        center = c(0, 0), 
+        size = c(10, 5)
+    ), 
+    
+    # Define some gates at the entrances. These gates are 
+    # not interactable.
+    objects = list(
+        # Gates on the left
+        rectangle(
+            center = c(-3, 0), 
+            size = c(0.6, 1.3),
+            interactable = FALSE
+        ), 
+        rectangle(
+            center = c(-3, 1.9), 
+            size = c(0.6, 1.2),
+            interactable = FALSE
+        ),
+        rectangle(
+            center = c(-3, -1.9), 
+            size = c(0.6, 1.2),
+            interactable = FALSE
+        ),
+
+        # Gates on the right
+        rectangle(
+            center = c(3, 0), 
+            size = c(0.6, 1.3),
+            interactable = FALSE
+        ), 
+        rectangle(
+            center = c(3, 1.9), 
+            size = c(0.6, 1.2),
+            interactable = FALSE
+        ),
+        rectangle(
+            center = c(3, -1.9), 
+            size = c(0.6, 1.2),
+            interactable = FALSE
+        )
+    ),
+
+    # Define the one-directional passages
+    limited_access = list(
+        # Gates on the left
+        segment(from = c(-3.3, -0.6), to = c(-3.3, -1.3)),
+        segment(from = c(-2.7, 0.6), to = c(-2.7, 1.3)),
+
+        # Gates on the right
+        segment(from = c(2.7, -0.6), to = c(2.7, -1.3)),
+        segment(from = c(3.3, 0.6), to = c(3.3, 1.3))
+    ),
+
+    # Define the entrances themselves. The two entrances
+    # at the top and bottom of the space represent the 
+    # stairs agents can use to exit the train tracks. 
+    # The two entrances at the left and right represent
+    # the entrances of the train station.
+    entrance = rbind(
+        # Top and bottom
+        c(0, 2.5), 
+        c(0, -2.5),
+
+        # Left and right
+        c(-5, 0),
+        c(5, 0)
+    )
+)
+
+plot(
+    train_station,
+    segment.hjust = 0
+)
+```
+
+With this environment, we have enough to run a first simulation by calling the function `simulate`. Most of the arguments to this function stem from `predped`'s  `simulate` function, and we refer to [`predped`'s documentation](https://github.com/ndpvh/predped/reference/index.html) for an elaborate explanation of these arguments. For now, it's enough to know the following ones:
+
+- `iterations`: The number of iterations the simulation should run for;
+- `max_agents`: The maximal number of agents that you want to run around in the environment;
+- `add_agent_after`: How many iterations should pass between agents entering the environment;
+- `goal_number`: The number of goals that should be assigned to each agent;
+- `goal_duration`: How long each goal should take;
+- `time_step`: How much time pass between each step of the pedestrian;
+- `print_iteration`: Whether to print the iteration number of the simulation.
+
+Using the train station, we can now call:
+
+```{r, eval = FALSE}
+result <- simulate(
+    train_station,
+    iterations = 100,
+    max_agents = 10,
+    add_agent_after = 5,
+    archetypes = c(
+        "BaselineEuropean",
+        "BigRushingDutch"
+    )
+)
+```
+
+The variable `result` is a named list containing all of the results relevant to the user. Specifically, `result` consists of the slots: 
+
+- `"agents"`: `data.frame` containing the `QVEmod` parameters for each agent in the simulation;
+- `"movement"`: `data.frame` containing the positions of each agent at each time in time-series format;
+- `"aerosol"`: `data.frame` containing the contamination of the agents through aerosol exposure;
+- `"droplet"`: `data.frame` containing the contamination of the agents through droplet exposure;
+- `"surface"`: `data.frame` containing the contamination of the agents through tactile exposure;
+- `"agent_exposure"`: `data.frame` containing the total contamination of the agents.
+
+These results in and of themselves already paint an interesting picture. However, they do not tell us the infection risk of the agents: Only how much they were exposed to contamination. To get the infection risk, we have to use the function `infection_risk`:
+
+```{r, echo = FALSE, include = FALSE}
+result <- readRDS(file.path("..", "vignettes", "result.Rds"))
+```
+
+```{r}
+risk <- infection_risk(result)
+head(risk)
+```
+
+which gives us the results we are interested in.
+
+
+
+# Visualization 
+
+The `simulate` function allows for automatic visualization of how agents walk around in the environment as well as the contamination of this environment. You can do this by changing the `save_gif` argument to `TRUE`, by providing a name to `filename`, and by providing a `path` to `path`:
+
+```{r, eval = FALSE}
+result <- simulate(
+    train_station,
+    iterations = 100,
+    max_agents = 10,
+    add_agent_after = 5,
+    archetypes = c(
+        "BaselineEuropean",
+        "BigRushingDutch"
+    ),
+    save_gif = TRUE,
+    filename = "simulation",
+    path = file.path("figures")
+)
+```
+
+You can then find an informative gif at the specified location, in our case:
+
+```{r, echo = FALSE}
+#| fig.alt: >
+#|      One sees three plots.
+#|      In the left plot, one sees blue dots walking around in a simplified version of a train station.
+#|      In the two other plots, one can see the spread as visualized through a heatmap.
+#| fig.cap: >
+#|      _Visualization of the virus disease spread._
+knitr::include_graphics(
+    file.path("..", "vignettes", "simulation.gif")
+)
+```
+
+The left part of the gif shows the pedestrian movements in the same way predped would communicate them. The middle and right plot show contamination in the room for the air and droplets respectively.
+
+There are a few things to note in this visualization:
+- In the left plot, agents who have a viral load of 1 are indicated by having a `fill` color that is the same as the contamination in the other two plots. This color can be changed through the `plot_args` argument (see later);
+- While `predped` assumes a continuous space, `QVEmod` requires this space to be discretized. This is the reason why the left plot does not map directly on to the other two. The precision of this discretization can be controlled through the `dx` argument in `simulate`, **but note that this is currently not supported**: `QVEmod` assumes that the discretized air cells have a width and height of 50cm, which is the default precision in `simulate`;
+- For visualization purposes, the plots of the contamination normalize the contamination to fall between 0 and 1. By default, this normalization is done at each time step, meaning that each step in the gifs only shows the relative rather than absolute contamination of a region. Experience shows that this makes for a nicer visual, but that if one wants to interpret contamination, they should check the contamination `data.frame`s in `result`.
+
+We allow for some personalization of the plots through the `plot_args` argument. This named list takes in the arguments of the `heatmap` function as well as arguments to the `plot` function of `predped`. For example, toggling `dark_mode` can be done as follows:
+
+```{r, eval = FALSE}
+result <- simulate(
+    train_station,
+    iterations = 100,
+    max_agents = 10,
+    add_agent_after = 5,
+    archetypes = c(
+        "BaselineEuropean",
+        "BigRushingDutch"
+    ),
+    save_gif = TRUE,
+    filename = "simulation_dark",
+    path = file.path("figures"),
+    plot_args = list(
+        "dark_mode" = TRUE
+    )
+)
+```
+
+You can then find an informative gif at the specified location, in our case:
+
+```{r, echo = FALSE}
+#| fig.alt: >
+#|      One sees three plots.
+#|      In the left plot, one sees blue dots walking around in a simplified version of a train station.
+#|      In the two other plots, one can see the spread as visualized through a heatmap.
+#|      In comparison to the other gif, this one is darker.
+#| fig.cap: >
+#|      _Visualization of the virus disease spread._
+knitr::include_graphics(
+    file.path("..", "vignettes", "simulation_dark.gif")
+)
+```
+
+Similarly, one can change the values of the contamination heatmap as follows:
+
+```{r, eval = FALSE}
+result <- simulate(
+    train_station,
+    iterations = 100,
+    max_agents = 10,
+    add_agent_after = 5,
+    archetypes = c(
+        "BaselineEuropean",
+        "BigRushingDutch"
+    ),
+    save_gif = TRUE,
+    filename = "simulation_red",
+    path = file.path("figures"),
+    plot_args = list(
+        "heatmap.fill" = c("green", "red")
+    )
+)
+```
+
+```{r, echo = FALSE}
+#| fig.alt: >
+#|      One sees three plots.
+#|      In the left plot, one sees blue dots walking around in a simplified version of a train station.
+#|      In the two other plots, one can see the spread as visualized through a heatmap.
+#|      In comparison to the other gif, this one shows green when there is little contamination and red when there is a lot of contamination.
+#| fig.cap: >
+#|      _Visualization of the virus disease spread._
+knitr::include_graphics(
+    file.path("..", "vignettes", "simulation_red.gif")
+)
+```
+
+
+
+# Advanced simulations
+
+## Agent and environment characteristics 
+
+Up to now, we haven't used many of the things we discussed in _Environments_ and _Agents_, and especially leaving the `epidemiology_` variables in the cold. In this brief section, we discuss how to include these characteristics in a simulation.
+
+<!-- <volledige specificatie>
+
+<onvolledige specificatie> -->
+
+## Initial conditions
+
+`initial_agents` only!
+
+## Situational change
