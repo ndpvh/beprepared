@@ -10,7 +10,7 @@ simulate(
   weights = rep(1/length(archetypes), length(archetypes)),
   archetypes_filename = NULL,
   sep = ",",
-  dx = 0.01,
+  dx = 0.1,
   path = file.path("results"),
   filename = NULL,
   save_gif = FALSE,
@@ -23,7 +23,7 @@ simulate(
   item_args = data.frame(prob = 1, transfer_efficiency = 0.7, surface_ratio = 0.5,
     surface_decay_rate = 0.274),
   agent_args = data.frame(prob = rep(1/3, 3), viral_load = c(1, 0, 0),
-    contamination_load_air = c(0, 0, 0), contamination_load_droplet = c(0, 0, 0),
+    contamination_load_air = c(1, 0, 0), contamination_load_droplet = c(1, 0, 0),
     contamination_load_surface = c(1, 0, 0), emission_rate_air = rep(0.53, 3),
     emission_rate_droplet = rep(0.47, 3), pick_up_air = c(2.3, 30, 30), pick_up_droplet =
     c(2.3, 30, 30), wearing_mask = c(0, 0, 0)),
@@ -37,9 +37,9 @@ simulate(
     
     SurfaceExposureRatio = 0.01),
   output_config = data.frame(Suppress = FALSE, Path = file.path(path, "output"),
-    AerosolContaminationWriteInterval = 15, AerosolContaminationPrecision = 17,
-    DropletContaminationWriteInterval = 15, DropletContaminationPrecision = 17,
-    SurfaceContaminationWriteInterval = 15, SurfaceContaminationPrecision = 17),
+    AerosolContaminationWriteInterval = 1, AerosolContaminationPrecision = 17,
+    DropletContaminationWriteInterval = 1, DropletContaminationPrecision = 17,
+    SurfaceContaminationWriteInterval = 1, SurfaceContaminationPrecision = 17),
   time_step = 0.5,
   ...
 )
@@ -66,10 +66,10 @@ in \code{archetypes_filename}. Defaults to \code{","}.}
 While \code{predped} operates on continuous space, \code{QVEmod} requires 
 this space to consist of discretized cells. This argument is therefore 
 multiplied with the values of \code{AirCellSize}, \code{MobilityCellSize}, 
-and \code{AgentReach}. Defaults to \code{0.01}, which should be interpreted as
-1cm, making \code{dx} in meters (i.e., just like the units of 
+and \code{AgentReach}. Defaults to \code{0.1}, which should be interpreted as
+10cm, making \code{dx} in meters (i.e., just like the units of 
 \code{environment}). This default is based on the contagion patterns of 
-\code{QVEmod}, which are defined in cm as a unit. Note that QVEmod doesn't 
+\code{QVEmod}, which are defined in 10cm as a unit. Note that QVEmod doesn't 
 allow changes to this argument yet.}
 
 \item{path}{String denoting the path under which to save the results of the 

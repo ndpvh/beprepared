@@ -8,7 +8,7 @@ heatmap(
   data,
   heatmap.fill = c("white", "salmon"),
   Z.label = "Z",
-  Z.limits = range(data$Z),
+  Z.limits = c(0, max(data$Z)),
   X.limits = range(data$X),
   Y.limits = range(data$Y),
   shape.color = "black",
