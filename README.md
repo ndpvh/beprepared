@@ -6,13 +6,13 @@ A frozen version of the [`viral-predped` repository](https://github.com/ndpvh/vi
 
 To install the package, you can use the `remotes` package:
 
-```{r, eval = FALSE}
+```
 remotes::install_github("ndpvh/beprepared")
 ```
 
 To use the package, use `library` 
 
-```{r, eval = FALSE}
+```
 library(beprepared)
 ```
 
