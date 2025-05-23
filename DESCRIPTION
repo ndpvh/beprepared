@@ -30,6 +30,7 @@ Collate:
     'assign_values.R'
     'hill.R'
     'infection_risk.R'
+    'defaults.R'
     'simulate.R'
 Suggests: 
     fs,
