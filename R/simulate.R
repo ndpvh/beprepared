@@ -226,6 +226,10 @@ simulate <- function(environment,
     env_config <- defaults(env_config, default_env_config)
     output_config <- defaults(output_config, default_output_config)
 
+    # Adjust the cell sizes in env_config with the dx argument
+    env_config$AirCellSize <- env_config$AirCellSize * dx
+    env_config$MobilityCellSize <- env_config$MobilityCellSize * dx
+    env_config$AgentReach <- env_config$AgentReach * dx
 
 
 
