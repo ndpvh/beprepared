@@ -353,8 +353,10 @@ so that, under the hood, the additional agent characteristics are filled out to 
 
 
 
-## Initial conditions
+<!-- ## Initial conditions
 
 `initial_agents` only!
 
-## Situational change
+
+
+## Situational change -->
