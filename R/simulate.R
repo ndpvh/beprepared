@@ -142,10 +142,10 @@
 #' While \code{predped} operates on continuous space, \code{QVEmod} requires 
 #' this space to consist of discretized cells. This argument is therefore 
 #' multiplied with the values of \code{AirCellSize}, \code{MobilityCellSize}, 
-#' and \code{AgentReach}. Defaults to \code{0.01}, which should be interpreted as
-#' 1cm, making \code{dx} in meters (i.e., just like the units of 
+#' and \code{AgentReach}. Defaults to \code{0.1}, which should be interpreted as
+#' 10cm, making \code{dx} in meters (i.e., just like the units of 
 #' \code{environment}). This default is based on the contagion patterns of 
-#' \code{QVEmod}, which are defined in cm as a unit. Note that QVEmod doesn't 
+#' \code{QVEmod}, which are defined in 10cm as a unit. Note that QVEmod doesn't 
 #' allow changes to this argument yet.
 #' @param path String denoting the path under which to save the results of the 
 #' simulation. Defaults to a folder "results" under the current directory.
@@ -200,7 +200,7 @@ simulate <- function(environment,
                      weights = rep(1 / length(archetypes), length(archetypes)), 
                      archetypes_filename = NULL,
                      sep = ",",
-                     dx = 0.01,
+                     dx = 0.1,
                      path = file.path("results"),
                      filename = NULL, 
                      save_gif = FALSE,
@@ -259,11 +259,11 @@ simulate <- function(environment,
                      output_config = data.frame(
                         Suppress = FALSE,
                         Path = file.path(path, "output"),
-                        AerosolContaminationWriteInterval = 15,
+                        AerosolContaminationWriteInterval = 1,
                         AerosolContaminationPrecision = 17,
-                        DropletContaminationWriteInterval = 15,
+                        DropletContaminationWriteInterval = 1,
                         DropletContaminationPrecision = 17,
-                        SurfaceContaminationWriteInterval = 15,
+                        SurfaceContaminationWriteInterval = 1,
                         SurfaceContaminationPrecision = 17
                      ),
                      time_step = 0.5,
@@ -631,9 +631,6 @@ simulate <- function(environment,
         )
     )
 
-    # Delete the obsolete saved data.
-    unlink(file.path(output_config$Path), recursive = TRUE)
-
     # If the filename is defined, save the results
     if(!is.null(filename)) {
         saveRDS(
@@ -651,10 +648,28 @@ simulate <- function(environment,
         # First create the plots through predped. Given that plot_args is a list 
         # of arguments to pass along the plot function, we need to add the trace
         # to this list and use do.call to actually perform the plotting.
+        #
+        # We delete all none-predped argument from the plot_args list first
+        predped_args <- plot_args
+        if(length(predped_args) != 0) {
+            heatmap_labels <- c(
+                "heatmap.fill", 
+                "Z.label", 
+                "Z.limits", 
+                "X.limits", 
+                "Y.limits", 
+                "legend.position", 
+                "legend.title.size", 
+                "legend.text.size"
+            )
+            idx <- !(names(predped_args) %in% heatmap_labels)
+
+            predped_args <- predped_args[idx]
+        }
         movement <- do.call(
             predped::plot,
             list(trace, "print_progress" = FALSE) %>% 
-                append(plot_args)
+                append(predped_args)
         )
 
         # Find out which agents are contagious and adjust the plots so that 
@@ -724,8 +739,8 @@ simulate <- function(environment,
         # bins.
         data <- data %>% 
             dplyr::mutate(
-                X = X * air_dx + env_center[1] - env_size[1]/2, 
-                Y = Y * air_dx + env_center[2] - env_size[2]/2
+                X = X * air_dx + env_center[1] - env_size[1]/2 + air_dx/2, 
+                Y = Y * air_dx + env_center[2] - env_size[2]/2 + air_dx/2
             ) %>% 
             dplyr::rename(Z = Contamination) 
 
@@ -753,6 +768,8 @@ simulate <- function(environment,
                         plot_args
                     )
                 )
+
+                return(plt)
             }
         )
 
@@ -768,8 +785,8 @@ simulate <- function(environment,
         # bins.
         data <- data %>% 
             dplyr::mutate(
-                X = X * air_dx + env_center[1] - env_size[1]/2, 
-                Y = Y * air_dx + env_center[2] - env_size[2]/2
+                X = X * air_dx + env_center[1] - env_size[1]/2 + air_dx/2, 
+                Y = Y * air_dx + env_center[2] - env_size[2]/2 + air_dx/2
             ) %>% 
             dplyr::rename(Z = Contamination)
 
@@ -797,6 +814,8 @@ simulate <- function(environment,
                         plot_args
                     )
                 )
+
+                return(plt)
             }
         )
 
@@ -827,6 +846,9 @@ simulate <- function(environment,
 
         cat("\rVisualizing results: |========|\n")
     }
+
+    # Delete the obsolete saved data.
+    unlink(file.path(output_config$Path), recursive = TRUE)
 
     return(results)
 }

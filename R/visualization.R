@@ -57,7 +57,7 @@
 heatmap <- function(data, 
                     heatmap.fill = c("white", "salmon"),
                     Z.label = "Z",
-                    Z.limits = range(data$Z),
+                    Z.limits = c(0, max(data$Z)),
                     X.limits = range(data$X),
                     Y.limits = range(data$Y),
                     shape.color = "black",
@@ -85,9 +85,13 @@ heatmap <- function(data,
     # for jumpy visualizations.
     if(sd(data$Z, na.rm = TRUE) == 0) {
         if(Z.limits[1] == Z.limits[2]) {
-            Z.limits <- c(1e-3, 1e-3)
+            Z.limits <- c(0, 1)
         }
     }
+
+    # Normalize Z
+    data$Z <- (data$Z - min(data$Z)) / diff(range(data$Z))
+    Z.limits <- c(0, 1)
 
     # Create the plot itself
     plt <- ggplot2::ggplot(
