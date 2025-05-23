@@ -205,67 +205,12 @@ simulate <- function(environment,
                      filename = NULL, 
                      save_gif = FALSE,
                      plot_args = list(),
-                     env_args = data.frame(
-                        decay_rate_air = 1.51, 
-                        decay_rate_droplet = 0.3, 
-                        decay_rate_surface = 0.262,
-                        air_exchange_rate = 0.2, 
-                        droplet_to_surface_transfer_rate = 18.18
-                     ),
-                     surf_args = data.frame(
-                        prob = 1, 
-                        transfer_efficiency = 0.5,
-                        touch_frequency = 15,
-                        surface_decay_rate = 0.969
-                     ),
-                     item_args = data.frame(
-                        prob = 1,
-                        transfer_efficiency = 0.7, 
-                        surface_ratio = 0.5,
-                        surface_decay_rate = 0.274
-                     ),
-                     agent_args = data.frame(
-                        prob = rep(1/3, 3),
-                        viral_load = c(1, 0, 0), 
-                        contamination_load_air = c(1, 0, 0), 
-                        contamination_load_droplet = c(1, 0, 0), 
-                        contamination_load_surface = c(1, 0, 0),
-                        emission_rate_air = rep(0.53, 3), 
-                        emission_rate_droplet = rep(0.47, 3), 
-                        pick_up_air = c(2.3, 30, 30), 
-                        pick_up_droplet = c(2.3, 30, 30),
-                        wearing_mask = c(0, 0, 0)
-                     ),
-                     env_config = data.frame(
-                        AirCellSize = 500,
-                        MobilityCellSize = 100,
-                        AgentReach = 500,
-                        SimulationTimeStep = 1/(120 * 30),
-                        HandwashingContaminationFraction = 0.3,
-                        HandwashingEffectDuration = 0.5,
-                        MaskEmissionAerosolReductionEfficiency = 0.4,
-                        MaskEmissionDropletReductionEfficiency = 0.04,
-                        MaskAerosolProtectionEfficiency = 0.4,
-                        MaskDropletProtectionEfficiency = 0.04,
-                        CleaningInterval = 1,
-                        Diffusivity = 23,
-                        WallAbsorbingProportion = 0.0,
-                        CoughingRate = 121,
-                        CoughingFactor = 1,
-                        CoughingAerosolPercentage = 1.0,
-                        CoughingDropletPercentage = 1.0,
-                        SurfaceExposureRatio = 0.01
-                     ),
-                     output_config = data.frame(
-                        Suppress = FALSE,
-                        Path = file.path(path, "output"),
-                        AerosolContaminationWriteInterval = 1,
-                        AerosolContaminationPrecision = 17,
-                        DropletContaminationWriteInterval = 1,
-                        DropletContaminationPrecision = 17,
-                        SurfaceContaminationWriteInterval = 1,
-                        SurfaceContaminationPrecision = 17
-                     ),
+                     env_args = data.frame(),
+                     surf_args = data.frame(),
+                     item_args = data.frame(),
+                     agent_args = data.frame(),
+                     env_config = data.frame(),
+                     output_config = data.frame(),
                      time_step = 0.5,
                      ...) {
 
@@ -273,62 +218,13 @@ simulate <- function(environment,
     # Step 0: Check of arguments
     #---------------------------------------------------------------------------
 
-    # Function for checking the presence of the necessary columns in the arguments
-    # to be passed on to QVEmod
-    check_columns <- function(expected, 
-                              received,
-                              argument) {
-
-        check <- expected %in% received
-
-        if(!all(check)) {
-            stop(
-                paste(
-                    "Columns",
-                    expected[check], 
-                    "not defined in argument", 
-                    argument
-                )
-            )
-        }
-    }
-
-    # Check the arguments for the QVEmod Environment class
-    cols <- c(
-        "decay_rate_air", 
-        "decay_rate_droplet", 
-        "decay_rate_surface", 
-        "air_exchange_rate", 
-        "droplet_to_surface_transfer_rate"
-    )
-    check_columns(cols, colnames(env_args), "`env_args`")
-    
-    # Check the arguments for the QVEmod Fixture class
-    cols <- c(
-        "prob", 
-        "transfer_efficiency",
-        "touch_frequency",
-        "surface_decay_rate"
-    )
-    check_columns(cols, colnames(surf_args), "`surf_args`")
-
-    # Check the arguments for the QVEmod Item class
-    cols <- c(
-        "prob", 
-        "transfer_efficiency",
-        "surface_ratio",
-        "surface_decay_rate"
-    )
-    check_columns(cols, colnames(item_args), "`item_args`")
-
-    # Multiply the discretization space in the env_config with dx, putting it on 
-    # the meter scale
-    env_config$AirCellSize <- env_config$AirCellSize * dx
-    env_config$MobilityCellSize <- env_config$MobilityCellSize * dx
-    env_config$AgentReach <- env_config$AgentReach * dx
-
-    # Multiply the time_step with the env_config times
-    env_config$SimulationTimeStep <- env_config$SimulationTimeStep * time_step
+    # Adjust the configuration data.frame's with the defaults 
+    env_args <- defaults(env_args, default_env)
+    surf_args <- defaults(surf_args, default_surf)
+    item_args <- defaults(item_args, default_item)
+    agent_args <- defaults(agent_args, default_agent)
+    env_config <- defaults(env_config, default_env_config)
+    output_config <- defaults(output_config, default_output_config)
 
 
 
@@ -614,19 +510,19 @@ simulate <- function(environment,
         "agents" = agent_args,
         "movement" = data, 
         "aerosol" = data.table::fread(
-            file.path(output_config$Path, "aerosol_contamination.csv"),
+            file.path(path, output_config$Path, "aerosol_contamination.csv"),
             data.table = FALSE
         ), 
         "droplet" = data.table::fread(
-            file.path(output_config$Path, "droplet_contamination.csv"),
+            file.path(path, output_config$Path, "droplet_contamination.csv"),
             data.table = FALSE
         ),
         "surface" = data.table::fread(
-            file.path(output_config$Path, "surface_contamination.csv"),
+            file.path(path, output_config$Path, "surface_contamination.csv"),
             data.table = FALSE
         ), 
         "agent_exposure" = data.table::fread(
-            file.path(output_config$Path, "agent_exposure.csv"),
+            file.path(path, output_config$Path, "agent_exposure.csv"),
             data.table = FALSE
         )
     )
@@ -848,7 +744,7 @@ simulate <- function(environment,
     }
 
     # Delete the obsolete saved data.
-    unlink(file.path(output_config$Path), recursive = TRUE)
+    unlink(file.path(path, output_config$Path), recursive = TRUE)
 
     return(results)
 }
