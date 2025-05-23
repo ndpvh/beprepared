@@ -231,6 +231,11 @@ simulate <- function(environment,
     env_config$MobilityCellSize <- env_config$MobilityCellSize * dx
     env_config$AgentReach <- env_config$AgentReach * dx
 
+    env_config$SimulationTimeStep <- env_config$SimulationTimeStep * time_step
+
+    # Add current path to the output_config
+    output_config$Path <- file.path(path, output_config$Path)
+
 
 
     #---------------------------------------------------------------------------
@@ -514,19 +519,19 @@ simulate <- function(environment,
         "agents" = agent_args,
         "movement" = data, 
         "aerosol" = data.table::fread(
-            file.path(path, output_config$Path, "aerosol_contamination.csv"),
+            file.path(output_config$Path, "aerosol_contamination.csv"),
             data.table = FALSE
         ), 
         "droplet" = data.table::fread(
-            file.path(path, output_config$Path, "droplet_contamination.csv"),
+            file.path(output_config$Path, "droplet_contamination.csv"),
             data.table = FALSE
         ),
         "surface" = data.table::fread(
-            file.path(path, output_config$Path, "surface_contamination.csv"),
+            file.path(output_config$Path, "surface_contamination.csv"),
             data.table = FALSE
         ), 
         "agent_exposure" = data.table::fread(
-            file.path(path, output_config$Path, "agent_exposure.csv"),
+            file.path(output_config$Path, "agent_exposure.csv"),
             data.table = FALSE
         )
     )
@@ -748,7 +753,7 @@ simulate <- function(environment,
     }
 
     # Delete the obsolete saved data.
-    unlink(file.path(path, output_config$Path), recursive = TRUE)
+    unlink(file.path(output_config$Path), recursive = TRUE)
 
     return(results)
 }
