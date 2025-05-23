@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import math
-
+import ipdb
 
 from corona_model.agent import Agent
 from corona_model.environment import Environment
@@ -61,6 +61,11 @@ def translate_data(time_series,
                 row,
                 first_entry = j == 0
             )
+
+        # Small fix: If the last thing the agent did is not leave, make sure 
+        # they do!
+        if(type(actions[idx]).__name__ != 'Leave'): 
+            actions[idx + 1] = Leave()
 
         # Add the Agent to the list
         agent_args = select(agent_specifications, i)
