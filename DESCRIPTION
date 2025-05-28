@@ -22,7 +22,8 @@ Imports:
     gifski,
     scales
 Depends:
-    reticulate
+    reticulate,
+    devtools
 RoxygenNote: 7.3.2
 Collate:
     'imports.R'
