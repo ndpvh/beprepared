@@ -388,18 +388,18 @@ simulate <- function(environment,
         )
     }
 
-    # qve_environment <- python_functions$translate_env(
-    #     shape_segments, 
-    #     object_segments,
-    #     void_centers,
-    #     env_args
-    # )
-    qve_environment <- translate_env(
+    qve_environment <- python_functions$translate_env(
         shape_segments, 
         object_segments,
         void_centers,
         env_args
     )
+    # qve_environment <- translate_env(
+    #     shape_segments, 
+    #     object_segments,
+    #     void_centers,
+    #     env_args
+    # )
 
     # Translate the surfaces and items, which need to be provided to the model 
     # separately. For both `Item`s and `Surface`s, we make an additional check
@@ -411,14 +411,14 @@ simulate <- function(environment,
         unique(data$goal_id),
         item_args
     )
-    # surfaces <- python_functions$translate_items(
-    #     discr_data, 
-    #     item_args
-    # )
-    surfaces <- translate_items(
+    surfaces <- python_functions$translate_items(
         discr_data, 
         item_args
     )
+    # surfaces <- translate_items(
+    #     discr_data, 
+    #     item_args
+    # )
 
     # Now do the `Fixture`s. These can only be done when there are any fixtures 
     # in the environment in the first place
@@ -484,14 +484,14 @@ simulate <- function(environment,
         unique(discr_data$id),
         agent_args
     )
-    # agents <- python_functions$translate_data(
-    #     discr_data, 
-    #     agent_args
-    # )
-    agents <- translate_data(
+    agents <- python_functions$translate_data(
         discr_data, 
         agent_args
     )
+    # agents <- translate_data(
+    #     discr_data, 
+    #     agent_args
+    # )
 
 
 
@@ -504,31 +504,31 @@ simulate <- function(environment,
     #---------------------------------------------------------------------------  
 
     # Combine all information in a QVEmod `Model`
-    # viral_model <- python_functions$Model(
-    #     as.integer(max(data$iteration) - 1), 
-    #     qve_environment, 
-    #     agents, 
-    #     surfaces = surfaces
-    # )
-    viral_model <- Model(
+    viral_model <- python_functions$Model(
         as.integer(max(data$iteration) - 1), 
         qve_environment, 
         agents, 
         surfaces = surfaces
     )
+    # viral_model <- Model(
+    #     as.integer(max(data$iteration) - 1), 
+    #     qve_environment, 
+    #     agents, 
+    #     surfaces = surfaces
+    # )
 
     # Execute the model with the configuration
     cat("\rRunning viral model")
-    # python_functions$run_model(
-    #     viral_model,
-    #     list(env_config, output_config),
-    #     c("env", "output")
-    # )
-    run_model(
+    python_functions$run_model(
         viral_model,
         list(env_config, output_config),
         c("env", "output")
     )
+    # run_model(
+    #     viral_model,
+    #     list(env_config, output_config),
+    #     c("env", "output")
+    # )
     cat("\n")
 
 

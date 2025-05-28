@@ -13,7 +13,13 @@
 # }
 
 # Unpreferred method, but reliable
-reticulate::source_python(file.path("inst", "python", "module.py"))
+#' @export 
+python_functions <- reticulate::import_from_path(
+    "module",
+    system.file("python", package = "beprepared"),
+    delay_load = TRUE
+)
+# reticulate::source_python(file.path("inst", "python", "module.py"))
 
 
 # devtools::install(file.path("dependencies", "predped"))
