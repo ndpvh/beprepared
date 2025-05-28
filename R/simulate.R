@@ -237,8 +237,11 @@ simulate <- function(environment,
     output_config$Path <- file.path(path, output_config$Path)
 
     # If the output path doesn't exist, create it
-    if(!dir.exists(output_config$Path)) {
-        dir.create(output_config$Path)
+    if(!dir.exists(file.path(output_config$Path))) {
+        dir.create(
+            file.path(output_config$Path),
+            recursive = TRUE
+        )
     }
 
 
