@@ -388,7 +388,7 @@ simulate <- function(environment,
         )
     }
 
-    qve_environment <- py$translate_env(
+    qve_environment <- python_functions$translate_env(
         shape_segments, 
         object_segments,
         void_centers,
@@ -405,7 +405,7 @@ simulate <- function(environment,
         unique(data$goal_id),
         item_args
     )
-    surfaces <- py$translate_items(
+    surfaces <- python_functions$translate_items(
         discr_data, 
         item_args
     )
@@ -434,7 +434,7 @@ simulate <- function(environment,
             obj$id, 
             surf_args
         )
-        obj <- py$translate_surf(
+        obj <- python_functions$translate_surf(
             obj, 
             surf_args
         )
@@ -470,7 +470,7 @@ simulate <- function(environment,
         unique(discr_data$id),
         agent_args
     )
-    agents <- py$translate_data(
+    agents <- python_functions$translate_data(
         discr_data, 
         agent_args
     )
@@ -486,7 +486,7 @@ simulate <- function(environment,
     #---------------------------------------------------------------------------  
 
     # Combine all information in a QVEmod `Model`
-    viral_model <- py$Model(
+    viral_model <- python_functions$Model(
         as.integer(max(data$iteration) - 1), 
         qve_environment, 
         agents, 
@@ -495,7 +495,7 @@ simulate <- function(environment,
 
     # Execute the model with the configuration
     cat("\rRunning viral model")
-    py$run_model(
+    python_functions$run_model(
         viral_model,
         list(env_config, output_config),
         c("env", "output")
