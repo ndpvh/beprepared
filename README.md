@@ -16,6 +16,13 @@ To use the package, use `library`
 library(beprepared)
 ```
 
+Note that the package may not load automatically, stating that it cannot find the Python module `module`. One known fix is to first load the package `reticulate` before loading `beprepared`:
+
+```
+library(reticulate)
+library(beprepared)
+```
+
 ## Functionality
 
 This package allows users to simulate realistic viral disease spread patterns in realistic situations such as the supermarket, a bar, or a train station. For a detailed explanation on how to use the package, we refer the reader to the [Documentation](https://github.com/ndpvh/beprepared-viral-predped/reference/index.html). In the documentation, one can find the [background of the two models](https://github.com/ndpvh/beprepared-viral-predped/articles/background.html) that make up the package and [a detailed example](https://github.com/ndpvh/beprepared-viral-predped/articles/example.html). Additionally, one can find a detailed step-by-step guide on [how to create environments](https://github.com/ndpvh/beprepared-viral-predped/articles/environments.html) and [how to run simulations](https://github.com/ndpvh/beprepared-viral-predped/articles/simulations.html).
