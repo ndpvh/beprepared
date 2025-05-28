@@ -388,7 +388,13 @@ simulate <- function(environment,
         )
     }
 
-    qve_environment <- python_functions$translate_env(
+    # qve_environment <- python_functions$translate_env(
+    #     shape_segments, 
+    #     object_segments,
+    #     void_centers,
+    #     env_args
+    # )
+    qve_environment <- translate_env(
         shape_segments, 
         object_segments,
         void_centers,
@@ -405,7 +411,11 @@ simulate <- function(environment,
         unique(data$goal_id),
         item_args
     )
-    surfaces <- python_functions$translate_items(
+    # surfaces <- python_functions$translate_items(
+    #     discr_data, 
+    #     item_args
+    # )
+    surfaces <- translate_items(
         discr_data, 
         item_args
     )
@@ -434,7 +444,11 @@ simulate <- function(environment,
             obj$id, 
             surf_args
         )
-        obj <- python_functions$translate_surf(
+        # obj <- python_functions$translate_surf(
+        #     obj, 
+        #     surf_args
+        # )
+        obj <- translate_surf(
             obj, 
             surf_args
         )
@@ -470,7 +484,11 @@ simulate <- function(environment,
         unique(discr_data$id),
         agent_args
     )
-    agents <- python_functions$translate_data(
+    # agents <- python_functions$translate_data(
+    #     discr_data, 
+    #     agent_args
+    # )
+    agents <- translate_data(
         discr_data, 
         agent_args
     )
@@ -486,7 +504,13 @@ simulate <- function(environment,
     #---------------------------------------------------------------------------  
 
     # Combine all information in a QVEmod `Model`
-    viral_model <- python_functions$Model(
+    # viral_model <- python_functions$Model(
+    #     as.integer(max(data$iteration) - 1), 
+    #     qve_environment, 
+    #     agents, 
+    #     surfaces = surfaces
+    # )
+    viral_model <- Model(
         as.integer(max(data$iteration) - 1), 
         qve_environment, 
         agents, 
@@ -495,7 +519,12 @@ simulate <- function(environment,
 
     # Execute the model with the configuration
     cat("\rRunning viral model")
-    python_functions$run_model(
+    # python_functions$run_model(
+    #     viral_model,
+    #     list(env_config, output_config),
+    #     c("env", "output")
+    # )
+    run_model(
         viral_model,
         list(env_config, output_config),
         c("env", "output")
