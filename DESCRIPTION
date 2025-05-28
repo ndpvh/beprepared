@@ -12,7 +12,6 @@ Description: This package combines the M4MA pedestrian model with the QVE model 
 License: GPL-3
 Encoding: UTF-8
 Imports: 
-    reticulate,
     dplyr,
     tidyr,
     magrittr,
@@ -22,6 +21,8 @@ Imports:
     matrixStats,
     gifski,
     scales
+Depends:
+    reticulate
 RoxygenNote: 7.3.2
 Collate:
     'imports.R'
