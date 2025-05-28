@@ -35,4 +35,6 @@ Collate:
 Suggests: 
     fs,
     testthat (>= 3.0.0)
+Remotes:
+    m4ma/m4ma
 Config/testthat/edition: 3
