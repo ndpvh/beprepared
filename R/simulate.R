@@ -236,6 +236,11 @@ simulate <- function(environment,
     # Add current path to the output_config
     output_config$Path <- file.path(path, output_config$Path)
 
+    # If the output path doesn't exist, create it
+    if(!dir.exists(output_config$Path)) {
+        dir.create(output_config$Path)
+    }
+
 
 
     #---------------------------------------------------------------------------
