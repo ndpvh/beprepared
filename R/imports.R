@@ -11,5 +11,5 @@ reticulate::virtualenv_create("r-reticulate")
     )
 }
 
-# devtools::install(file.path("dependencies", "predped"))
-devtools::load_all(file.path("dependencies", "predped"))
+devtools::install(file.path("dependencies", "predped"))
+# devtools::load_all(file.path("dependencies", "predped"))
